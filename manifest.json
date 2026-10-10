@@ -1,0 +1,32 @@
+{
+  "name": "Jurnal Keuangan Syariah",
+  "short_name": "Jurnal Syariah",
+  "description": "Aplikasi pencatatan keuangan pribadi sesuai prinsip syariah: transaksi, zakat, infak, sedekah, dan laporan keuangan.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4faf7",
+  "theme_color": "#0e7c66",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Vercel
+.vercel
+
+# File server lokal (tidak perlu diunggah, hanya untuk Windows lokal)
+# Hapus baris berikut jika kamu ingin menyertakannya di repo:
+# server.ps1
