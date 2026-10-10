@@ -99,11 +99,11 @@ const UI = (() => {
       <div class="section-head">
         <h2>Dana Sosial</h2>
       </div>
-      <div class="card card-pad">
-        <div class="row"><span class="lbl">🕌 Zakat</span><span class="amt">${rupiah(sosial.zakat)}</span></div>
-        <div class="row"><span class="lbl">🤲 Infak</span><span class="amt">${rupiah(sosial.infak)}</span></div>
-        <div class="row"><span class="lbl">❤️ Sedekah</span><span class="amt">${rupiah(sosial.sedekah)}</span></div>
-        <div class="row"><span class="lbl">🏛️ Wakaf</span><span class="amt">${rupiah(sosial.wakaf)}</span></div>
+      <div class="social-grid">
+        <div class="social-tile zakat"><div class="s-ico">🕌</div><div class="s-lbl">Zakat</div><div class="s-amt">${rupiah(sosial.zakat)}</div></div>
+        <div class="social-tile infak"><div class="s-ico">🤲</div><div class="s-lbl">Infak</div><div class="s-amt">${rupiah(sosial.infak)}</div></div>
+        <div class="social-tile sedekah"><div class="s-ico">❤️</div><div class="s-lbl">Sedekah</div><div class="s-amt">${rupiah(sosial.sedekah)}</div></div>
+        <div class="social-tile wakaf"><div class="s-ico">🏛️</div><div class="s-lbl">Wakaf</div><div class="s-amt">${rupiah(sosial.wakaf)}</div></div>
       </div>
 
       <div class="section-head">
