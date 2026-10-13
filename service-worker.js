@@ -1,11 +1,11 @@
 // Service Worker sederhana: cache aset agar aplikasi bisa dibuka offline.
-const CACHE = 'jurnal-syariah-v2';
+const CACHE = 'jurnal-siswa-v3';
 const ASSETS = [
   'index.html',
   'manifest.json',
   'css/style.css',
   'js/db.js',
-  'js/zakat.js',
+  'js/tabungan.js',
   'js/laporan.js',
   'js/ui.js',
   'js/app.js',

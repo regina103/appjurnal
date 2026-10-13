@@ -1,7 +1,7 @@
 {
-  "name": "Jurnal Keuangan Syariah",
-  "short_name": "Jurnal Syariah",
-  "description": "Aplikasi pencatatan keuangan pribadi sesuai prinsip syariah: transaksi, zakat, infak, sedekah, dan laporan keuangan.",
+  "name": "Jurnal Keuangan Siswa",
+  "short_name": "Keuangan Siswa",
+  "description": "Aplikasi pencatatan keuangan untuk pelajar: catat uang saku, atur pengeluaran, tetapkan budget harian, dan menabung untuk target.",
   "start_url": "index.html",
   "scope": "./",
   "display": "standalone",

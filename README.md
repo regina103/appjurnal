@@ -1,17 +1,23 @@
-# Jurnal Keuangan Syariah
+# Jurnal Keuangan Siswa
 
-Aplikasi pencatatan keuangan pribadi (mobile web app / PWA) sesuai prinsip syariah.
+Aplikasi pencatatan keuangan untuk pelajar (mobile web app / PWA).
+Membantu siswa mencatat uang saku, mengatur pengeluaran, menetapkan budget harian, dan menabung untuk target.
 Dibuat dengan HTML, CSS, dan JavaScript murni — tanpa framework dan tanpa server backend.
 Data disimpan lokal di perangkat menggunakan `localStorage`.
 
 ## Fitur
-- Pencatatan transaksi pemasukan & pengeluaran
-- Akun syariah: bagi hasil/mudharabah, murabahah, zakat, infak, sedekah, wakaf
-- Pemisahan dana halal & non-halal
-- Perhitungan zakat otomatis (2,5%) dengan kalkulator nisab & haul
-- Laporan keuangan: laba rugi, neraca, arus kas
+- Pencatatan uang masuk (uang saku, kiriman bulanan, hadiah, beasiswa) & uang keluar (jajan, alat tulis, transport, pulsa, hiburan, dll)
+- Tabungan: total yang sudah disetor + progres menuju target menabung yang bisa ditentukan sendiri
+- Budget harian: pantau pengeluaran hari ini vs batas yang ditetapkan
+- Laporan keuangan: ringkasan pemasukan/pengeluaran per kategori dan sisa uang saku
 - Tema terang/gelap, ekspor data JSON
 - PWA: bisa di-install ke layar utama HP dan dibuka offline
+
+## Menu
+- **Beranda** — sisa uang saku, status budget harian, progres target tabungan, dan transaksi terbaru
+- **Transaksi** — daftar & filter semua catatan uang masuk/keluar
+- **Tabungan** — total tabungan, target menabung, dan pengaturan budget harian
+- **Laporan** — rincian per kategori dan ringkasan saldo
 
 ## Menjalankan secara lokal
 

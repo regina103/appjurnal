@@ -12,32 +12,36 @@ const DB = (() => {
     seeded: 'js_seeded'
   };
 
-  // ---- Akun bawaan sesuai prinsip syariah ----
-  // jenis: 'pemasukan' | 'pengeluaran' | 'dana'
-  // dana : 'halal' | 'nonhalal'  (pemisahan dana)
+  // ---- Akun bawaan untuk pengelolaan keuangan siswa ----
+  // jenis : 'pemasukan' | 'pengeluaran'
+  // Kategori disusun agar sesuai keseharian pelajar: uang saku, jajan,
+  // kebutuhan sekolah, menabung, dan sedekah.
   const DEFAULT_ACCOUNTS = [
-    { id: 'gaji',       nama: 'Pemasukan Halal (uang saku/kerja)', jenis: 'pemasukan',   dana: 'halal',    ikon: '💵' },
-    { id: 'bagihasil',  nama: 'Bagi Hasil / Mudharabah',           jenis: 'pemasukan',   dana: 'halal',    ikon: '🤝' },
-    { id: 'murabahah',  nama: 'Keuntungan Murabahah',              jenis: 'pemasukan',   dana: 'halal',    ikon: '📈' },
-    { id: 'hadiah',     nama: 'Hadiah / Pemberian',                jenis: 'pemasukan',   dana: 'halal',    ikon: '🎁' },
-    { id: 'nonhalal',   nama: 'Dana Non-Halal (bunga, dll)',       jenis: 'pemasukan',   dana: 'nonhalal', ikon: '⚠️' },
+    // Pemasukan (uang masuk)
+    { id: 'uangsaku',   nama: 'Uang Saku Harian',          jenis: 'pemasukan',   dana: 'halal', ikon: '💵' },
+    { id: 'bulanan',    nama: 'Kiriman/Uang Bulanan',      jenis: 'pemasukan',   dana: 'halal', ikon: '🗓️' },
+    { id: 'hadiah',     nama: 'Hadiah / Pemberian',        jenis: 'pemasukan',   dana: 'halal', ikon: '🎁' },
+    { id: 'beasiswa',   nama: 'Beasiswa',                  jenis: 'pemasukan',   dana: 'halal', ikon: '🎓' },
+    { id: 'sampingan',  nama: 'Hasil Usaha Sampingan',     jenis: 'pemasukan',   dana: 'halal', ikon: '🛍️' },
 
-    { id: 'kebutuhan',  nama: 'Kebutuhan Pokok',                   jenis: 'pengeluaran', dana: 'halal',    ikon: '🛒' },
-    { id: 'pendidikan', nama: 'Pendidikan / Sekolah',              jenis: 'pengeluaran', dana: 'halal',    ikon: '📚' },
-    { id: 'transport',  nama: 'Transportasi',                      jenis: 'pengeluaran', dana: 'halal',    ikon: '🚌' },
-    { id: 'zakat',      nama: 'Zakat',                             jenis: 'pengeluaran', dana: 'halal',    ikon: '🕌' },
-    { id: 'infak',      nama: 'Infak',                             jenis: 'pengeluaran', dana: 'halal',    ikon: '🤲' },
-    { id: 'sedekah',    nama: 'Sedekah',                           jenis: 'pengeluaran', dana: 'halal',    ikon: '❤️' },
-    { id: 'wakaf',      nama: 'Wakaf',                             jenis: 'pengeluaran', dana: 'halal',    ikon: '🏛️' },
-    { id: 'lainnya',    nama: 'Pengeluaran Lainnya',               jenis: 'pengeluaran', dana: 'halal',    ikon: '📦' }
+    // Pengeluaran (uang keluar)
+    { id: 'jajan',      nama: 'Jajan / Makan',             jenis: 'pengeluaran', dana: 'halal', ikon: '🍔' },
+    { id: 'alattulis',  nama: 'Alat Tulis & Buku',         jenis: 'pengeluaran', dana: 'halal', ikon: '✏️' },
+    { id: 'sekolah',    nama: 'Keperluan Sekolah',         jenis: 'pengeluaran', dana: 'halal', ikon: '🏫' },
+    { id: 'transport',  nama: 'Transportasi / Ongkos',     jenis: 'pengeluaran', dana: 'halal', ikon: '🚌' },
+    { id: 'pulsa',      nama: 'Pulsa / Kuota Internet',    jenis: 'pengeluaran', dana: 'halal', ikon: '📱' },
+    { id: 'hiburan',    nama: 'Hiburan / Main',            jenis: 'pengeluaran', dana: 'halal', ikon: '🎮' },
+    { id: 'tabungan',   nama: 'Setor Tabungan',            jenis: 'pengeluaran', dana: 'halal', ikon: '🐷' },
+    { id: 'sedekah',    nama: 'Sedekah / Infak',           jenis: 'pengeluaran', dana: 'halal', ikon: '❤️' },
+    { id: 'lainnya',    nama: 'Pengeluaran Lainnya',       jenis: 'pengeluaran', dana: 'halal', ikon: '📦' }
   ];
 
   const DEFAULT_SETTINGS = {
-    hargaEmasPerGram: 1300000,  // Rp per gram (bisa diubah user)
-    nisabGram: 85,              // nisab zakat maal = 85 gram emas
-    nilaiZakat: 0.025,          // 2.5%
     mataUang: 'Rp',
-    tema: 'terang'
+    tema: 'terang',
+    targetTabungan: 0,          // target menabung yang ingin dicapai siswa (Rp)
+    namaTarget: '',             // mis. "Beli sepeda", "Beli buku"
+    budgetHarian: 0             // batas pengeluaran harian yang disarankan (Rp)
   };
 
   function read(key, fallback) {

@@ -1,6 +1,6 @@
 /* =====================================================================
    ui.js — Render antarmuka & interaksi.
-   Semua halaman (beranda, transaksi, zakat, laporan) dirender di sini.
+   Semua halaman (beranda, transaksi, tabungan, laporan) dirender di sini.
    ===================================================================== */
 
 const UI = (() => {
@@ -58,36 +58,39 @@ const UI = (() => {
   function renderBeranda() {
     const n = Laporan.neraca();
     const arus = Laporan.arusKas();
-    const sosial = Laporan.ringkasanSosial();
+    const prog = Tabungan.progres();
+    const budget = Tabungan.statusBudget();
     const txs = DB.getTransaksi().slice(0, 5);
 
     const listHtml = txs.length
       ? txs.map(txRow).join('')
-      : emptyState('📝', 'Belum ada transaksi', 'Tekan tombol + untuk mencatat.');
+      : emptyState('📝', 'Belum ada catatan', 'Tekan tombol + untuk mencatat uang masuk/keluar.');
 
     view.innerHTML = `
       <div class="balance-card">
-        <div class="label">Saldo (Dana Halal)</div>
+        <div class="label">Sisa Uang Saku</div>
         <div class="amount">${rupiah(n.kekayaanBersih)}</div>
         <div class="balance-sub">
-          <div class="pill"><small>Pemasukan</small><b>${rupiah(arus.masuk)}</b></div>
-          <div class="pill"><small>Pengeluaran</small><b>${rupiah(arus.keluar)}</b></div>
+          <div class="pill"><small>Uang Masuk</small><b>${rupiah(arus.masuk)}</b></div>
+          <div class="pill"><small>Uang Keluar</small><b>${rupiah(arus.keluar)}</b></div>
         </div>
       </div>
 
       ${
-        n.kasNonHalal > 0
-          ? `<div class="note warn">⚠️ Dana non-halal tercatat <b>${rupiah(
-              n.kasNonHalal
-            )}</b>. Secara syariah dana ini bukan hak milik dan dianjurkan disalurkan untuk kemaslahatan umum (bukan diniatkan sedekah).</div>`
+        budget.budget > 0
+          ? `<div class="note ${budget.lebih ? 'warn' : ''}">
+              ${budget.lebih
+                ? `⚠️ Pengeluaran hari ini <b>${rupiah(budget.terpakai)}</b> sudah melebihi budget harian <b>${rupiah(budget.budget)}</b>.`
+                : `💡 Pengeluaran hari ini <b>${rupiah(budget.terpakai)}</b> dari budget <b>${rupiah(budget.budget)}</b>. Sisa <b>${rupiah(budget.sisa)}</b>.`}
+             </div>`
           : ''
       }
 
       <div class="summary-grid">
         <div class="stat">
-          <div class="ico">🤲</div>
-          <div class="val">${rupiah(sosial.total)}</div>
-          <div class="cap">Total ZIS & Wakaf</div>
+          <div class="ico">🐷</div>
+          <div class="val">${rupiah(prog.terkumpul)}</div>
+          <div class="cap">Total Tabungan</div>
         </div>
         <div class="stat">
           <div class="ico">📅</div>
@@ -96,15 +99,16 @@ const UI = (() => {
         </div>
       </div>
 
-      <div class="section-head">
-        <h2>Dana Sosial</h2>
-      </div>
-      <div class="social-grid">
-        <div class="social-tile zakat"><div class="s-ico">🕌</div><div class="s-lbl">Zakat</div><div class="s-amt">${rupiah(sosial.zakat)}</div></div>
-        <div class="social-tile infak"><div class="s-ico">🤲</div><div class="s-lbl">Infak</div><div class="s-amt">${rupiah(sosial.infak)}</div></div>
-        <div class="social-tile sedekah"><div class="s-ico">❤️</div><div class="s-lbl">Sedekah</div><div class="s-amt">${rupiah(sosial.sedekah)}</div></div>
-        <div class="social-tile wakaf"><div class="s-ico">🏛️</div><div class="s-lbl">Wakaf</div><div class="s-amt">${rupiah(sosial.wakaf)}</div></div>
-      </div>
+      ${
+        prog.target > 0
+          ? `<div class="section-head"><h2>🎯 Target Menabung</h2><a href="#" data-goto="tabungan">Atur</a></div>
+             <div class="card card-pad">
+               <div class="row"><span class="lbl">${esc(prog.namaTarget || 'Target tabungan')}</span><span class="amt">${rupiah(prog.terkumpul)} / ${rupiah(prog.target)}</span></div>
+               <div class="progress"><span style="width:${prog.persen}%"></span></div>
+               <div class="row"><span class="lbl">${prog.tercapai ? '🎉 Target tercapai!' : 'Kurang ' + rupiah(prog.kurang) + ' lagi'}</span><span class="amt">${prog.persen}%</span></div>
+             </div>`
+          : ''
+      }
 
       <div class="section-head">
         <h2>Transaksi Terbaru</h2>
@@ -145,14 +149,11 @@ const UI = (() => {
   function txRow(t) {
     const akun = DB.getAccount(t.akunId);
     const masuk = t.jenis === 'pemasukan';
-    const nonhalal = t.dana === 'nonhalal';
     return `
       <div class="tx-item">
         <div class="tx-ico">${akun ? akun.ikon : '📦'}</div>
         <div class="tx-body">
-          <div class="tx-title">${esc(akun ? akun.nama : 'Lainnya')}${
-      nonhalal ? '<span class="badge warn">non-halal</span>' : ''
-    }</div>
+          <div class="tx-title">${esc(akun ? akun.nama : 'Lainnya')}</div>
           <div class="tx-meta">${tanggalPendek(t.tanggal)}${
       t.catatan ? ' • ' + esc(t.catatan) : ''
     }</div>
@@ -163,67 +164,62 @@ const UI = (() => {
   }
 
   // ================================================================
-  //  HALAMAN: ZAKAT
+  //  HALAMAN: TABUNGAN & TARGET
   // ================================================================
-  function renderZakat() {
+  function renderTabungan() {
     const set = s();
-    const harta = Zakat.hartaHalalSaatIni();
-    const h = Zakat.hitung(harta, set);
-    const haul = Zakat.statusHaul(set.haulMulai);
+    const prog = Tabungan.progres(set);
+    const budget = Tabungan.statusBudget(set);
 
     view.innerHTML = `
       <div class="card card-pad">
-        <h2 style="margin-bottom:4px">Kalkulator Zakat Maal</h2>
-        <p style="color:var(--muted);font-size:.84rem">Zakat harta 2,5% bila mencapai nisab (85 gram emas) dan telah dimiliki 1 tahun (haul).</p>
+        <h2 style="margin-bottom:4px">🐷 Tabunganku</h2>
+        <p style="color:var(--muted);font-size:.84rem">Total uang yang sudah kamu setor ke tabungan, dihitung otomatis dari kategori "Setor Tabungan".</p>
 
         <div class="divider"></div>
 
-        <div class="row"><span class="lbl">Harta halal saat ini<small>otomatis dari transaksi</small></span><span class="amt">${rupiah(harta)}</span></div>
-        <div class="row"><span class="lbl">Nilai nisab<small>${set.nisabGram} gram × ${rupiah(set.hargaEmasPerGram)}</small></span><span class="amt">${rupiah(h.nisab)}</span></div>
-        <div class="row total"><span class="lbl">Status</span><span class="amt ${h.wajib ? 'pos' : ''}">${
-      h.wajib ? '✅ Mencapai nisab' : '➖ Belum mencapai nisab'
-    }</span></div>
+        <div class="row total"><span class="lbl">Total Tabungan</span><span class="amt pos">${rupiah(prog.terkumpul)}</span></div>
 
         ${
-          h.wajib
-            ? `<div class="note">Perkiraan zakat yang perlu dikeluarkan: <b>${rupiah(h.jumlahZakat)}</b> (${h.persen}%).</div>
-               <button class="btn gold" style="margin-top:14px" id="bayarZakat">Catat Pembayaran Zakat</button>`
-            : `<div class="note warn">Hartamu masih kurang ${rupiah(h.kurang)} untuk mencapai nisab. Zakat belum wajib.</div>`
-        }
-      </div>
-
-      <div class="card card-pad" style="margin-top:12px">
-        <h2 style="margin-bottom:8px">Haul (perhitungan 1 tahun)</h2>
-        ${
-          haul.aktif
+          prog.target > 0
             ? `
-          <div class="row"><span class="lbl">Mulai haul</span><span class="amt">${tanggalPendek(set.haulMulai)}</span></div>
-          <div class="progress"><span style="width:${haul.persen}%"></span></div>
-          <div class="row"><span class="lbl">Berjalan ${haul.hariBerjalan} hari</span><span class="amt">${haul.persen}%</span></div>
-          ${
-            haul.selesai
-              ? `<div class="note">🎉 Haul telah genap 1 tahun. Jika harta mencapai nisab, zakat sudah waktunya ditunaikan.</div>`
-              : `<div class="note">⏳ Sisa ${haul.hariSisa} hari lagi menuju haul (± ${Zakat.HARI_HAUL} hari / 1 tahun hijriah).</div>`
-          }
-          <button class="btn ghost" id="resetHaul">Atur ulang tanggal haul</button>
+          <div class="row"><span class="lbl">Target<small>${esc(prog.namaTarget || 'Tanpa nama')}</small></span><span class="amt">${rupiah(prog.target)}</span></div>
+          <div class="progress"><span style="width:${prog.persen}%"></span></div>
+          <div class="row"><span class="lbl">${prog.tercapai ? '🎉 Target tercapai!' : 'Kurang ' + rupiah(prog.kurang) + ' lagi'}</span><span class="amt">${prog.persen}%</span></div>
         `
-            : `
-          <p style="color:var(--muted);font-size:.84rem;margin-bottom:12px">Tandai kapan hartamu mulai mencapai nisab untuk menghitung haul.</p>
-          <button class="btn" id="mulaiHaul">Mulai Hitung Haul Hari Ini</button>
-        `
+            : `<div class="note">Belum ada target menabung. Tentukan targetmu di bawah agar lebih semangat menabung!</div>`
         }
+
+        <button class="btn gold" style="margin-top:14px" id="setorTabungan">Setor ke Tabungan</button>
       </div>
 
       <div class="card card-pad" style="margin-top:12px">
-        <h2 style="margin-bottom:8px">Pengaturan Nisab</h2>
-        <label class="field"><span>Harga emas per gram (Rp)</span>
-          <input type="number" id="setHargaEmas" value="${set.hargaEmasPerGram}" min="0" />
+        <h2 style="margin-bottom:8px">🎯 Target Menabung</h2>
+        <label class="field"><span>Nama target</span>
+          <input type="text" id="setNamaTarget" value="${esc(set.namaTarget)}" placeholder="mis. Beli sepatu baru" />
         </label>
-        <label class="field"><span>Nisab (gram emas)</span>
-          <input type="number" id="setNisab" value="${set.nisabGram}" min="1" />
+        <label class="field"><span>Jumlah target (${set.mataUang})</span>
+          <input type="number" id="setTargetTabungan" value="${set.targetTabungan || ''}" min="0" placeholder="0" />
         </label>
-        <button class="btn" id="simpanNisab">Simpan Pengaturan</button>
-        <div class="mini-note">Perbarui harga emas sesuai kondisi terkini agar perhitungan akurat.</div>
+        <button class="btn" id="simpanTarget">Simpan Target</button>
+      </div>
+
+      <div class="card card-pad" style="margin-top:12px">
+        <h2 style="margin-bottom:8px">💡 Budget Harian</h2>
+        <p style="color:var(--muted);font-size:.84rem;margin-bottom:10px">Tetapkan batas pengeluaran per hari agar uang saku cukup sampai akhir.</p>
+        ${
+          budget.budget > 0
+            ? `
+          <div class="row"><span class="lbl">Terpakai hari ini</span><span class="amt ${budget.lebih ? 'neg' : ''}">${rupiah(budget.terpakai)}</span></div>
+          <div class="progress"><span style="width:${budget.persen}%"></span></div>
+          <div class="row"><span class="lbl">${budget.lebih ? '⚠️ Melebihi budget' : 'Sisa budget hari ini'}</span><span class="amt ${budget.lebih ? 'neg' : 'pos'}">${rupiah(budget.sisa)}</span></div>
+        `
+            : ''
+        }
+        <label class="field" style="margin-top:10px"><span>Budget per hari (${set.mataUang})</span>
+          <input type="number" id="setBudgetHarian" value="${set.budgetHarian || ''}" min="0" placeholder="0" />
+        </label>
+        <button class="btn" id="simpanBudget">Simpan Budget</button>
       </div>
     `;
   }
@@ -259,19 +255,12 @@ const UI = (() => {
         <div class="row total"><span class="lbl">Selisih (Surplus/Defisit)</span><span class="amt ${lr.selisih>=0?'pos':'neg'}">${rupiah(lr.selisih)}</span></div>
       </div>
 
-      <div class="section-head"><h2>⚖️ Neraca</h2></div>
+      <div class="section-head"><h2>💰 Ringkasan Saldo</h2></div>
       <div class="card card-pad">
-        <div class="row"><span class="lbl">Kas Dana Halal</span><span class="amt">${rupiah(nr.kasHalal)}</span></div>
-        <div class="row"><span class="lbl">Kas Dana Non-Halal<small>disalurkan, bukan hak milik</small></span><span class="amt">${rupiah(nr.kasNonHalal)}</span></div>
-        <div class="row total"><span class="lbl">Total Aset</span><span class="amt">${rupiah(nr.totalAset)}</span></div>
-        <div class="row"><span class="lbl">Kekayaan Bersih (halal)</span><span class="amt pos">${rupiah(nr.kekayaanBersih)}</span></div>
-      </div>
-
-      <div class="section-head"><h2>💧 Arus Kas</h2></div>
-      <div class="card card-pad">
-        <div class="row"><span class="lbl">Kas Masuk</span><span class="amt pos">${rupiah(ak.masuk)}</span></div>
-        <div class="row"><span class="lbl">Kas Keluar</span><span class="amt neg">${rupiah(ak.keluar)}</span></div>
-        <div class="row total"><span class="lbl">Arus Kas Bersih</span><span class="amt ${ak.arusBersih>=0?'pos':'neg'}">${rupiah(ak.arusBersih)}</span></div>
+        <div class="row"><span class="lbl">Total Uang Masuk</span><span class="amt pos">${rupiah(ak.masuk)}</span></div>
+        <div class="row"><span class="lbl">Total Uang Keluar</span><span class="amt neg">${rupiah(ak.keluar)}</span></div>
+        <div class="row"><span class="lbl">Total Tabungan</span><span class="amt">${rupiah(Tabungan.totalTabungan())}</span></div>
+        <div class="row total"><span class="lbl">Sisa Uang Saku</span><span class="amt pos">${rupiah(nr.kekayaanBersih)}</span></div>
       </div>
 
       <button class="btn ghost" id="exportData" style="margin-top:16px">⬇️ Ekspor Data (JSON)</button>
@@ -295,11 +284,11 @@ const UI = (() => {
 
     openModal(`
       <h3>Tambah Transaksi</h3>
-      <p class="sub">Catat pemasukan atau pengeluaran keuanganmu.</p>
+      <p class="sub">Catat uang masuk (uang saku) atau uang keluar (jajan, dll).</p>
 
       <div class="seg">
-        <button type="button" class="segbtn in ${jenis==='pemasukan'?'on':''}" data-jenis="pemasukan">⬆️ Pemasukan</button>
-        <button type="button" class="segbtn out ${jenis==='pengeluaran'?'on':''}" data-jenis="pengeluaran">⬇️ Pengeluaran</button>
+        <button type="button" class="segbtn in ${jenis==='pemasukan'?'on':''}" data-jenis="pemasukan">⬆️ Uang Masuk</button>
+        <button type="button" class="segbtn out ${jenis==='pengeluaran'?'on':''}" data-jenis="pengeluaran">⬇️ Uang Keluar</button>
       </div>
 
       <label class="field"><span>Jumlah (${s().mataUang})</span>
@@ -389,32 +378,22 @@ const UI = (() => {
       return;
     }
 
-    // ---- Zakat ----
-    if (e.target.id === 'mulaiHaul') {
-      DB.setSettings({ haulMulai: new Date().toISOString() });
-      toast('Haul mulai dihitung hari ini.');
-      renderZakat();
+    // ---- Tabungan & Target ----
+    if (e.target.id === 'setorTabungan') {
+      formTransaksi({ jenis: 'pengeluaran', akunId: 'tabungan' });
     }
-    if (e.target.id === 'resetHaul') {
-      DB.setSettings({ haulMulai: new Date().toISOString() });
-      toast('Tanggal haul diperbarui.');
-      renderZakat();
+    if (e.target.id === 'simpanTarget') {
+      const nama = document.getElementById('setNamaTarget').value.trim();
+      const target = Number(document.getElementById('setTargetTabungan').value) || 0;
+      DB.setSettings({ namaTarget: nama, targetTabungan: target });
+      toast('Target menabung disimpan.');
+      renderTabungan();
     }
-    if (e.target.id === 'simpanNisab') {
-      const harga = Number(document.getElementById('setHargaEmas').value) || 0;
-      const nisab = Number(document.getElementById('setNisab').value) || 85;
-      DB.setSettings({ hargaEmasPerGram: harga, nisabGram: nisab });
-      toast('Pengaturan nisab disimpan.');
-      renderZakat();
-    }
-    if (e.target.id === 'bayarZakat') {
-      const harta = Zakat.hartaHalalSaatIni();
-      const h = Zakat.hitung(harta);
-      formTransaksi({ jenis: 'pengeluaran', akunId: 'zakat' });
-      setTimeout(() => {
-        const f = document.getElementById('fJumlah');
-        if (f) f.value = h.jumlahZakat;
-      }, 180);
+    if (e.target.id === 'simpanBudget') {
+      const budget = Number(document.getElementById('setBudgetHarian').value) || 0;
+      DB.setSettings({ budgetHarian: budget });
+      toast('Budget harian disimpan.');
+      renderTabungan();
     }
 
     // ---- Laporan ----
@@ -441,9 +420,9 @@ const UI = (() => {
   //  NAVIGASI
   // ================================================================
   const PAGES = {
-    beranda: { title: 'Jurnal Syariah', render: renderBeranda },
+    beranda: { title: 'Keuangan Siswa', render: renderBeranda },
     transaksi: { title: 'Transaksi', render: renderTransaksi },
-    zakat: { title: 'Zakat & Haul', render: renderZakat },
+    tabungan: { title: 'Tabungan & Target', render: renderTabungan },
     laporan: { title: 'Laporan Keuangan', render: renderLaporan }
   };
 

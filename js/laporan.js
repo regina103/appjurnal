@@ -1,8 +1,8 @@
 /* =====================================================================
-   laporan.js — Perhitungan laporan keuangan sederhana:
-   - Laba Rugi (ringkasan pemasukan vs pengeluaran)
-   - Neraca    (saldo kas, dibagi dana halal & non-halal)
-   - Arus Kas  (ringkasan kas masuk/keluar per periode)
+   laporan.js — Perhitungan laporan keuangan sederhana untuk siswa:
+   - Laba Rugi (ringkasan uang masuk vs uang keluar per kategori)
+   - Neraca    (sisa uang saku saat ini)
+   - Arus Kas  (ringkasan uang masuk/keluar per periode)
    ===================================================================== */
 
 const Laporan = (() => {
@@ -35,24 +35,19 @@ const Laporan = (() => {
   }
 
   // ---- Neraca (posisi saldo saat ini) ----
+  // Sisa uang = total pemasukan - total pengeluaran.
   function neraca() {
     const tx = DB.getTransaksi();
-    const saldo = { halal: 0, nonhalal: 0 };
+    let saldo = 0;
 
     tx.forEach((t) => {
       const arah = t.jenis === 'pemasukan' ? 1 : -1;
-      const bucket = t.dana === 'nonhalal' ? 'nonhalal' : 'halal';
-      saldo[bucket] += arah * t.jumlah;
+      saldo += arah * t.jumlah;
     });
 
-    const totalAset = saldo.halal + saldo.nonhalal;
     return {
-      kasHalal: saldo.halal,
-      kasNonHalal: saldo.nonhalal,
-      totalAset,
-      // Secara syariah, dana non-halal bukan hak milik -> dicatat sebagai kewajiban disalurkan
-      kewajibanNonHalal: Math.max(0, saldo.nonhalal),
-      kekayaanBersih: saldo.halal
+      totalAset: saldo,
+      kekayaanBersih: saldo // sisa uang saku
     };
   }
 
@@ -64,22 +59,5 @@ const Laporan = (() => {
     return { masuk, keluar, arusBersih: masuk - keluar, jumlahTransaksi: tx.length };
   }
 
-  // ---- Ringkasan sosial: zakat, infak, sedekah, wakaf ----
-  function ringkasanSosial() {
-    const tx = DB.getTransaksi();
-    const kategori = ['zakat', 'infak', 'sedekah', 'wakaf'];
-    const hasil = {};
-    let total = 0;
-    kategori.forEach((k) => {
-      const jml = tx
-        .filter((t) => t.akunId === k)
-        .reduce((s, t) => s + t.jumlah, 0);
-      hasil[k] = jml;
-      total += jml;
-    });
-    hasil.total = total;
-    return hasil;
-  }
-
-  return { labaRugi, neraca, arusKas, ringkasanSosial };
+  return { labaRugi, neraca, arusKas };
 })();
