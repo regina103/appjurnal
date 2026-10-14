@@ -17,31 +17,33 @@ const DB = (() => {
   // Kategori disusun agar sesuai keseharian pelajar: uang saku, jajan,
   // kebutuhan sekolah, menabung, dan sedekah.
   const DEFAULT_ACCOUNTS = [
-    // Pemasukan (uang masuk)
-    { id: 'uangsaku',   nama: 'Uang Saku Harian',          jenis: 'pemasukan',   dana: 'halal', ikon: '💵' },
-    { id: 'bulanan',    nama: 'Kiriman/Uang Bulanan',      jenis: 'pemasukan',   dana: 'halal', ikon: '🗓️' },
+    // Pemasukan (uang masuk) — relevan untuk pelajar
+    { id: 'uangsaku',   nama: 'Uang Saku',                 jenis: 'pemasukan',   dana: 'halal', ikon: '💵' },
     { id: 'hadiah',     nama: 'Hadiah / Pemberian',        jenis: 'pemasukan',   dana: 'halal', ikon: '🎁' },
-    { id: 'beasiswa',   nama: 'Beasiswa',                  jenis: 'pemasukan',   dana: 'halal', ikon: '🎓' },
-    { id: 'sampingan',  nama: 'Hasil Usaha Sampingan',     jenis: 'pemasukan',   dana: 'halal', ikon: '🛍️' },
+    { id: 'sisatabung', nama: 'Tabungan / Sisa',           jenis: 'pemasukan',   dana: 'halal', ikon: '👛' },
+    { id: 'masuklain',  nama: 'Pemasukan Lainnya',         jenis: 'pemasukan',   dana: 'halal', ikon: '➕' },
 
-    // Pengeluaran (uang keluar)
+    // Pengeluaran (uang keluar) — relevan untuk pelajar
     { id: 'jajan',      nama: 'Jajan / Makan',             jenis: 'pengeluaran', dana: 'halal', ikon: '🍔' },
     { id: 'alattulis',  nama: 'Alat Tulis & Buku',         jenis: 'pengeluaran', dana: 'halal', ikon: '✏️' },
     { id: 'sekolah',    nama: 'Keperluan Sekolah',         jenis: 'pengeluaran', dana: 'halal', ikon: '🏫' },
-    { id: 'transport',  nama: 'Transportasi / Ongkos',     jenis: 'pengeluaran', dana: 'halal', ikon: '🚌' },
-    { id: 'pulsa',      nama: 'Pulsa / Kuota Internet',    jenis: 'pengeluaran', dana: 'halal', ikon: '📱' },
-    { id: 'hiburan',    nama: 'Hiburan / Main',            jenis: 'pengeluaran', dana: 'halal', ikon: '🎮' },
-    { id: 'tabungan',   nama: 'Setor Tabungan',            jenis: 'pengeluaran', dana: 'halal', ikon: '🐷' },
-    { id: 'sedekah',    nama: 'Sedekah / Infak',           jenis: 'pengeluaran', dana: 'halal', ikon: '❤️' },
+    { id: 'transport',  nama: 'Transport / Ongkos',        jenis: 'pengeluaran', dana: 'halal', ikon: '🚌' },
+    { id: 'pulsa',      nama: 'Pulsa / Kuota',             jenis: 'pengeluaran', dana: 'halal', ikon: '📱' },
+    { id: 'sedekah',    nama: 'Sedekah / Infak',           jenis: 'pengeluaran', dana: 'halal', ikon: '🤲' },
+    { id: 'tabungan',   nama: 'Setor Tabungan',            jenis: 'pengeluaran', dana: 'halal', ikon: '👛' },
     { id: 'lainnya',    nama: 'Pengeluaran Lainnya',       jenis: 'pengeluaran', dana: 'halal', ikon: '📦' }
   ];
 
   const DEFAULT_SETTINGS = {
     mataUang: 'Rp',
     tema: 'terang',
-    targetTabungan: 0,          // target menabung yang ingin dicapai siswa (Rp)
-    namaTarget: '',             // mis. "Beli sepeda", "Beli buku"
-    budgetHarian: 0             // batas pengeluaran harian yang disarankan (Rp)
+    budgetHarian: 0,            // batas pengeluaran harian yang disarankan (Rp)
+    // Kantung tabungan: daftar tujuan menabung milik user.
+    // Tiap kantung: { id, nama, target, ikon }
+    kantung: [],
+    // Riwayat setoran per kantung: { id, kantungId, jumlah, tanggal, sumber, catatan }
+    //   sumber: 'manual' | 'sisa' (dialihkan dari sisa uang harian)
+    setoran: []
   };
 
   function read(key, fallback) {
@@ -124,6 +126,87 @@ const DB = (() => {
     return next;
   }
 
+  // ---- API Kantung Tabungan ----
+  function getKantung() {
+    return getSettings().kantung || [];
+  }
+
+  function tambahKantung(data) {
+    const list = getKantung();
+    const kantung = {
+      id: 'k_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      nama: (data.nama || 'Tabungan').trim().slice(0, 40),
+      target: Math.max(0, Number(data.target) || 0),
+      ikon: data.ikon || '🎯'
+    };
+    list.push(kantung);
+    setSettings({ kantung: list });
+    return kantung;
+  }
+
+  function ubahKantung(id, data) {
+    const list = getKantung().map((k) =>
+      k.id === id
+        ? {
+            ...k,
+            nama: data.nama !== undefined ? String(data.nama).trim().slice(0, 40) : k.nama,
+            target: data.target !== undefined ? Math.max(0, Number(data.target) || 0) : k.target,
+            ikon: data.ikon !== undefined ? data.ikon : k.ikon
+          }
+        : k
+    );
+    setSettings({ kantung: list });
+  }
+
+  function hapusKantung(id) {
+    const kantung = getKantung().filter((k) => k.id !== id);
+    const setoran = getSetoran().filter((s) => s.kantungId !== id);
+    setSettings({ kantung, setoran });
+  }
+
+  // ---- API Setoran kantung ----
+  function getSetoran() {
+    return getSettings().setoran || [];
+  }
+
+  // sumber: 'manual' | 'sisa'
+  function tambahSetoran(kantungId, jumlah, sumber, catatan) {
+    const list = getSetoran();
+    const setoran = {
+      id: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      kantungId,
+      jumlah: Math.max(0, Number(jumlah) || 0),
+      tanggal: new Date().toISOString(),
+      sumber: sumber || 'manual',
+      catatan: (catatan || '').trim()
+    };
+    if (setoran.jumlah <= 0) return null;
+    list.push(setoran);
+    setSettings({ setoran: list });
+
+    // Catat juga sebagai transaksi "Setor Tabungan" agar tampil di jurnal
+    // dan ikut mengurangi saldo uang harian.
+    tambahTransaksi({
+      jenis: 'pengeluaran',
+      akunId: 'tabungan',
+      jumlah: setoran.jumlah,
+      catatan:
+        (sumber === 'sisa' ? '[dari sisa harian] ' : '') +
+        (catatan || '')
+    });
+    return setoran;
+  }
+
+  function totalSetoranKantung(kantungId) {
+    return getSetoran()
+      .filter((s) => s.kantungId === kantungId)
+      .reduce((sum, s) => sum + s.jumlah, 0);
+  }
+
+  function totalSemuaTabungan() {
+    return getSetoran().reduce((sum, s) => sum + s.jumlah, 0);
+  }
+
   // ---- Reset / ekspor ----
   function resetSemua() {
     Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
@@ -152,6 +235,14 @@ const DB = (() => {
     hapusTransaksi,
     getSettings,
     setSettings,
+    getKantung,
+    tambahKantung,
+    ubahKantung,
+    hapusKantung,
+    getSetoran,
+    tambahSetoran,
+    totalSetoranKantung,
+    totalSemuaTabungan,
     resetSemua,
     exportJSON
   };

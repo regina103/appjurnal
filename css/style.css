@@ -632,21 +632,26 @@ textarea { resize: vertical; min-height: 60px; }
   font-size: 1.9rem;
   flex-shrink: 0;
 }
-.pf-badge.muhafiz .pf-badge-logo { background: var(--sage-light); }
-.pf-badge.munfiq  .pf-badge-logo { background: var(--lavender-light); }
-.pf-badge.warits  .pf-badge-logo { background: var(--bronze-light); }
+.pf-badge.muhafiz    .pf-badge-logo { background: var(--sage-light); }
+.pf-badge.mujtahid   .pf-badge-logo { background: var(--lavender-light); }
+.pf-badge.muhtasib   .pf-badge-logo { background: var(--bronze-light); }
+.pf-badge.munfiq     .pf-badge-logo { background: var(--rose-light); }
+.pf-badge.hakim      .pf-badge-logo { background: var(--sage-light); }
+.pf-badge.mutawakkil .pf-badge-logo { background: var(--bronze-light); }
 .pf-badge-nama { font-size: 1.15rem; font-weight: 800; }
-.pf-badge.muhafiz .pf-badge-nama { color: var(--sage-dark); }
-.pf-badge.munfiq  .pf-badge-nama { color: var(--lavender-dark); }
-.pf-badge.warits  .pf-badge-nama { color: var(--bronze-dark); }
+.pf-badge.muhafiz    .pf-badge-nama { color: var(--sage-dark); }
+.pf-badge.mujtahid   .pf-badge-nama { color: var(--lavender-dark); }
+.pf-badge.muhtasib   .pf-badge-nama { color: var(--bronze-dark); }
+.pf-badge.munfiq     .pf-badge-nama { color: var(--primary-dark); }
+.pf-badge.hakim      .pf-badge-nama { color: var(--sage-dark); }
+.pf-badge.mutawakkil .pf-badge-nama { color: var(--bronze-dark); }
 .pf-badge-arti { font-size: .82rem; color: var(--muted); margin-top: 2px; }
 
-/* Daftar semua tingkatan */
-.pf-levels { display: flex; gap: 10px; }
+/* Daftar semua tingkatan (6 level, grid 3 kolom) */
+.pf-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .pf-level {
-  flex: 1;
   text-align: center;
-  padding: 14px 8px;
+  padding: 14px 6px;
   border-radius: 16px;
   background: var(--card);
   border: 1.5px solid var(--border);
@@ -654,12 +659,36 @@ textarea { resize: vertical; min-height: 60px; }
   transition: all .2s;
 }
 .pf-level-logo { font-size: 1.6rem; display: block; filter: grayscale(.4); }
-.pf-level-nama { font-size: .74rem; font-weight: 700; color: var(--muted); margin-top: 6px; display: block; }
-.pf-level.aktif { opacity: 1; transform: translateY(-2px); border-color: transparent; }
+.pf-level-nama { font-size: .72rem; font-weight: 700; color: var(--muted); margin-top: 6px; display: block; }
+.pf-level.aktif { opacity: 1; transform: translateY(-2px); border-color: transparent; box-shadow: var(--shadow); }
 .pf-level.aktif .pf-level-logo { filter: none; }
-.pf-level.aktif.muhafiz { background: var(--sage-light); }
-.pf-level.aktif.muhafiz .pf-level-nama { color: var(--sage-dark); }
-.pf-level.aktif.munfiq { background: var(--lavender-light); }
-.pf-level.aktif.munfiq .pf-level-nama { color: var(--lavender-dark); }
-.pf-level.aktif.warits { background: var(--bronze-light); }
-.pf-level.aktif.warits .pf-level-nama { color: var(--bronze-dark); }
+.pf-level.aktif.muhafiz    { background: var(--sage-light); }
+.pf-level.aktif.muhafiz    .pf-level-nama { color: var(--sage-dark); }
+.pf-level.aktif.mujtahid   { background: var(--lavender-light); }
+.pf-level.aktif.mujtahid   .pf-level-nama { color: var(--lavender-dark); }
+.pf-level.aktif.muhtasib   { background: var(--bronze-light); }
+.pf-level.aktif.muhtasib   .pf-level-nama { color: var(--bronze-dark); }
+.pf-level.aktif.munfiq     { background: var(--rose-light); }
+.pf-level.aktif.munfiq     .pf-level-nama { color: var(--primary-dark); }
+.pf-level.aktif.hakim      { background: var(--sage-light); }
+.pf-level.aktif.hakim      .pf-level-nama { color: var(--sage-dark); }
+.pf-level.aktif.mutawakkil { background: var(--bronze-light); }
+.pf-level.aktif.mutawakkil .pf-level-nama { color: var(--bronze-dark); }
+
+/* Kartu kantung tabungan */
+.kantung-card { margin-top: 12px; }
+.kantung-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.kantung-ikon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  font-size: 1.3rem;
+  background: var(--primary-light);
+  flex-shrink: 0;
+}
+.kantung-nama { flex: 1; font-weight: 800; font-size: 1rem; }
+.kantung-del {
+  background: none; border: none; color: var(--muted);
+  font-size: 1rem; padding: 6px; cursor: pointer; border-radius: 8px;
+}
+.kantung-del:active { background: var(--rose-light); }

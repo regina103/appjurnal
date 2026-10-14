@@ -1,38 +1,55 @@
 /* =====================================================================
-   tabungan.js — Logika tabungan & target menabung untuk siswa.
+   tabungan.js — Logika tabungan (kantung) & budget harian untuk siswa.
 
-   Menggantikan modul zakat. Fokus pada hal yang relevan untuk pelajar:
-   - Total yang sudah ditabung (kategori "Setor Tabungan").
-   - Progres menuju target tabungan yang ditentukan sendiri.
-   - Ringkasan pengeluaran hari ini vs budget harian.
+   Fitur:
+   - Beberapa "kantung" tabungan (tujuan menabung) milik user.
+   - Setor ke kantung: manual, atau dialihkan dari SISA uang harian.
+   - Budget harian & ringkasan pengeluaran hari ini.
+   - "Sisa harian" = uang yang belum terpakai & belum dialihkan ke tabungan.
    ===================================================================== */
 
 const Tabungan = (() => {
-  // Total uang yang sudah disetorkan ke tabungan (kategori 'tabungan')
+  // Total seluruh tabungan (semua kantung).
   function totalTabungan() {
-    return DB.getTransaksi()
-      .filter((t) => t.akunId === 'tabungan')
-      .reduce((s, t) => s + t.jumlah, 0);
+    return DB.totalSemuaTabungan();
   }
 
-  // Progres menuju target
-  function progres(settings) {
-    const s = settings || DB.getSettings();
-    const terkumpul = totalTabungan();
-    const target = Number(s.targetTabungan) || 0;
+  // Progres satu kantung menuju targetnya.
+  function progresKantung(kantung) {
+    const terkumpul = DB.totalSetoranKantung(kantung.id);
+    const target = Number(kantung.target) || 0;
     const persen = target > 0 ? Math.min(100, Math.round((terkumpul / target) * 100)) : 0;
     const kurang = Math.max(0, target - terkumpul);
     return {
-      target,
-      namaTarget: s.namaTarget || '',
+      ...kantung,
       terkumpul,
-      kurang,
+      target,
       persen,
+      kurang,
       tercapai: target > 0 && terkumpul >= target
     };
   }
 
-  // Pengeluaran pada tanggal tertentu (default: hari ini)
+  // Semua kantung beserta progresnya.
+  function semuaProgres() {
+    return DB.getKantung().map(progresKantung);
+  }
+
+  // ---- Sisa uang harian yang bisa dialihkan ke tabungan ----
+  // Sisa = total pemasukan - total pengeluaran (pengeluaran sudah termasuk
+  // setoran tabungan). Jadi angka ini adalah "uang di tangan" yang belum
+  // terpakai dan belum ditabung. Hanya nilai positif yang bisa dialihkan.
+  function sisaBisaDitabung() {
+    let masuk = 0;
+    let keluar = 0;
+    DB.getTransaksi().forEach((t) => {
+      if (t.jenis === 'pemasukan') masuk += t.jumlah;
+      else keluar += t.jumlah;
+    });
+    return Math.max(0, masuk - keluar);
+  }
+
+  // Pengeluaran pada tanggal tertentu (default: hari ini).
   function pengeluaranHari(tanggal) {
     const acuan = tanggal ? new Date(tanggal) : new Date();
     const y = acuan.getFullYear();
@@ -47,7 +64,7 @@ const Tabungan = (() => {
       .reduce((s, t) => s + t.jumlah, 0);
   }
 
-  // Status budget harian
+  // Status budget harian.
   function statusBudget(settings) {
     const s = settings || DB.getSettings();
     const budget = Number(s.budgetHarian) || 0;
@@ -63,5 +80,12 @@ const Tabungan = (() => {
     };
   }
 
-  return { totalTabungan, progres, pengeluaranHari, statusBudget };
+  return {
+    totalTabungan,
+    progresKantung,
+    semuaProgres,
+    sisaBisaDitabung,
+    pengeluaranHari,
+    statusBudget
+  };
 })();

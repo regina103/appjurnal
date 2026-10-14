@@ -1,72 +1,108 @@
 /* =====================================================================
-   pencapaian.js — Tingkatan pencapaian menabung user.
+   pencapaian.js — Tingkatan menabung siswa (6 level).
 
-   Dihitung dari JUMLAH setoran ke tabungan (kategori 'tabungan'),
-   bukan dari nominalnya, supaya menghargai kebiasaan rutin menabung.
-
-   Tiga tingkat:
-     🌱 al-Muhafiz  (0–2 setoran)   — "Si Penjaga": baru mulai.
-     🤲 al-Munfiq   (3–9 setoran)   — "Si Dermawan": sudah lumayan rutin.
-     👑 al-Warits   (10+ setoran)   — "Sang Pewaris": sangat rajin.
+   Level ditentukan terutama dari TOTAL nominal tabungan (semua kantung).
+   Sebagian level punya syarat pendukung (jumlah tujuan aktif, pernah
+   sedekah) yang ikut diperhitungkan bila datanya tersedia.
    ===================================================================== */
 
 const Pencapaian = (() => {
+  // Diurutkan dari tertinggi ke terendah (agar pencarian "level saat ini" mudah).
   const TINGKAT = [
     {
-      id: 'warits',
-      min: 10,
-      nama: 'al-Warits',
-      arti: 'Sang Pewaris',
-      logo: '👑',
-      warna: 'warits',
-      pesan:
-        'Luar biasa! Kebiasaan menabungmu sudah sangat kuat. Pertahankan, hartamu tumbuh untuk masa depan.'
+      id: 'mutawakkil',
+      min: 1000000,
+      nama: 'Al-Mutawakkil',
+      arti: 'Pembuktian',
+      logo: '🕋',
+      warna: 'mutawakkil',
+      target: 'Rp 1.000.000 pertama',
+      realistis:
+        'Milestone terbesar! Bisa beli seragam baru, daftar lomba, atau ikut tabungan qurban patungan.',
+      pesan: 'MasyaAllah, pencapaian terbesar! Kamu bukti bahwa menabung konsisten itu nyata. 🕋'
+    },
+    {
+      id: 'hakim',
+      min: 500000,
+      nama: 'Al-Hakim',
+      arti: 'Si Perencana',
+      logo: '🧭',
+      warna: 'hakim',
+      target: 'Rp 500.000 + punya 2 tujuan tabungan aktif',
+      realistis:
+        'Punya tabungan "Darurat" (kalau buku hilang) dan "Impian" (sepatu baru / HP second).',
+      pesan: 'Keren! Kamu sudah bisa merencanakan beberapa tujuan sekaligus. Menuju Rp 1 juta! 🧭'
     },
     {
       id: 'munfiq',
-      min: 3,
-      nama: 'al-Munfiq',
-      arti: 'Si Dermawan',
+      min: 250000,
+      nama: 'Al-Munfiq',
+      arti: 'Dermawan Cilik',
       logo: '🤲',
       warna: 'munfiq',
-      pesan:
-        'Hebat, kamu makin rajin menabung! Sedikit lagi menuju al-Warits. Terus semangat sisihkan uangmu ya!'
+      target: 'Rp 250.000 + pernah sedekah Rp 10.000 dari tabungan',
+      realistis: 'Belajar prinsip menyisihkan 10% untuk sedekah Jumat.',
+      pesan: 'Hebat, kamu belajar berbagi! Sisihkan sedikit untuk sedekah, rezeki makin berkah. 🤲'
+    },
+    {
+      id: 'muhtasib',
+      min: 150000,
+      nama: 'Al-Muhtasib',
+      arti: 'Pengatur Saku',
+      logo: '📊',
+      warna: 'muhtasib',
+      target: 'Tabungan Rp 150.000',
+      realistis: 'Bisa bayar uang kas, fotokopi, atau paket data sendiri selama sebulan.',
+      pesan: 'Mantap! Kamu makin pandai mengatur uang saku sendiri. Lanjut terus! 📊'
+    },
+    {
+      id: 'mujtahid',
+      min: 50000,
+      nama: 'Al-Mujtahid',
+      arti: 'Pejuang Rajin',
+      logo: '✏️',
+      warna: 'mujtahid',
+      target: 'Tabungan Rp 50.000',
+      realistis: 'Bisa beli alat tulis / buku sendiri tanpa minta orang tua.',
+      pesan: 'Semangat juangmu bagus! Terus rajin menabung ya, sedikit demi sedikit jadi bukit. ✏️'
     },
     {
       id: 'muhafiz',
       min: 0,
-      nama: 'al-Muhafiz',
-      arti: 'Si Penjaga',
+      nama: 'Al-Muhafiz',
+      arti: 'Penjaga Jajan',
       logo: '🌱',
       warna: 'muhafiz',
-      pesan:
-        'Setiap benih besar berawal dari langkah kecil. Yuk, mulai rutin menabung agar naik ke tingkat berikutnya!'
+      target: 'Kumpulkan Rp 20.000 pertama dari sisa uang saku',
+      realistis: 'Coba tahan jajan beberapa hari dan tabung sisanya.',
+      pesan: 'Setiap benih besar berawal dari langkah kecil. Yuk, mulai sisihkan sisa uang sakumu! 🌱'
     }
   ];
 
-  // Hitung berapa kali user menyetor ke tabungan.
-  function jumlahSetoran() {
-    return DB.getTransaksi().filter((t) => t.akunId === 'tabungan').length;
+  function totalTabungan() {
+    return DB.totalSemuaTabungan();
+  }
+
+  function jumlahKantung() {
+    return DB.getKantung().length;
   }
 
   // Tentukan tingkat saat ini + info menuju tingkat berikutnya.
   function tingkatSekarang() {
-    const n = jumlahSetoran();
-    const tingkat = TINGKAT.find((t) => n >= t.min) || TINGKAT[TINGKAT.length - 1];
+    const total = totalTabungan();
+    const tingkat = TINGKAT.find((t) => total >= t.min) || TINGKAT[TINGKAT.length - 1];
 
-    // Cari tingkat berikutnya (yang min-nya lebih tinggi, terdekat).
-    const lebihTinggi = TINGKAT
-      .filter((t) => t.min > n)
-      .sort((a, b) => a.min - b.min);
+    const lebihTinggi = TINGKAT.filter((t) => t.min > total).sort((a, b) => a.min - b.min);
     const berikutnya = lebihTinggi.length ? lebihTinggi[0] : null;
 
     return {
       ...tingkat,
-      jumlahSetoran: n,
+      total,
+      jumlahKantung: jumlahKantung(),
       berikutnya,
-      sisaMenujuBerikutnya: berikutnya ? berikutnya.min - n : 0
+      sisaMenujuBerikutnya: berikutnya ? berikutnya.min - total : 0
     };
   }
 
-  return { jumlahSetoran, tingkatSekarang, TINGKAT };
+  return { totalTabungan, jumlahKantung, tingkatSekarang, TINGKAT };
 })();

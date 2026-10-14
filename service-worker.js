@@ -1,5 +1,5 @@
 // Service Worker sederhana: cache aset agar aplikasi bisa dibuka offline.
-const CACHE = 'imnote-v8';
+const CACHE = 'imnote-v9';
 const ASSETS = [
   'index.html',
   'manifest.json',

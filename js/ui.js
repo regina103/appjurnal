@@ -58,7 +58,9 @@ const UI = (() => {
   function renderBeranda() {
     const n = Laporan.neraca();
     const arus = Laporan.arusKas();
-    const prog = Tabungan.progres();
+    const totalTabungan = Tabungan.totalTabungan();
+    const sisa = Tabungan.sisaBisaDitabung();
+    const kantungList = Tabungan.semuaProgres();
     const budget = Tabungan.statusBudget();
     const txs = DB.getTransaksi().slice(0, 5);
 
@@ -88,8 +90,8 @@ const UI = (() => {
 
       <div class="summary-grid">
         <div class="stat">
-          <div class="ico">🐷</div>
-          <div class="val">${rupiah(prog.terkumpul)}</div>
+          <div class="ico">👛</div>
+          <div class="val">${rupiah(totalTabungan)}</div>
           <div class="cap">Total Tabungan</div>
         </div>
         <div class="stat">
@@ -100,13 +102,23 @@ const UI = (() => {
       </div>
 
       ${
-        prog.target > 0
-          ? `<div class="section-head"><h2>🎯 Target Menabung</h2><a href="#" data-goto="tabungan">Atur</a></div>
-             <div class="card card-pad">
-               <div class="row"><span class="lbl">${esc(prog.namaTarget || 'Target tabungan')}</span><span class="amt">${rupiah(prog.terkumpul)} / ${rupiah(prog.target)}</span></div>
-               <div class="progress"><span style="width:${prog.persen}%"></span></div>
-               <div class="row"><span class="lbl">${prog.tercapai ? '🎉 Target tercapai!' : 'Kurang ' + rupiah(prog.kurang) + ' lagi'}</span><span class="amt">${prog.persen}%</span></div>
-             </div>`
+        sisa > 0
+          ? `<div class="note">💰 Ada sisa uang <b>${rupiah(sisa)}</b> yang belum ditabung. <a href="#" data-goto="tabungan" style="color:var(--primary);font-weight:700">Alihkan ke tabungan →</a></div>`
+          : ''
+      }
+
+      ${
+        kantungList.length
+          ? `<div class="section-head"><h2>🎯 Kantung Tabungan</h2><a href="#" data-goto="tabungan">Kelola</a></div>
+             ${kantungList
+               .slice(0, 2)
+               .map(
+                 (k) => `<div class="card card-pad">
+                   <div class="row"><span class="lbl">${esc(k.ikon)} ${esc(k.nama)}</span><span class="amt">${rupiah(k.terkumpul)}${k.target ? ' / ' + rupiah(k.target) : ''}</span></div>
+                   ${k.target ? `<div class="progress"><span style="width:${k.persen}%"></span></div>` : ''}
+                 </div>`
+               )
+               .join('')}`
           : ''
       }
 
@@ -168,41 +180,57 @@ const UI = (() => {
   // ================================================================
   function renderTabungan() {
     const set = s();
-    const prog = Tabungan.progres(set);
+    const total = Tabungan.totalTabungan();
+    const kantungList = Tabungan.semuaProgres();
+    const sisa = Tabungan.sisaBisaDitabung();
     const budget = Tabungan.statusBudget(set);
+
+    const kartuKantung = kantungList.length
+      ? kantungList
+          .map(
+            (k) => `
+        <div class="card card-pad kantung-card">
+          <div class="kantung-head">
+            <span class="kantung-ikon">${esc(k.ikon)}</span>
+            <div class="kantung-nama">${esc(k.nama)}</div>
+            <button class="kantung-del" data-hapus-kantung="${k.id}" title="Hapus kantung">🗑️</button>
+          </div>
+          <div class="row"><span class="lbl">Terkumpul</span><span class="amt pos">${rupiah(k.terkumpul)}${k.target ? ' / ' + rupiah(k.target) : ''}</span></div>
+          ${
+            k.target
+              ? `<div class="progress"><span style="width:${k.persen}%"></span></div>
+                 <div class="row"><span class="lbl">${k.tercapai ? '🎉 Target tercapai!' : 'Kurang ' + rupiah(k.kurang)}</span><span class="amt">${k.persen}%</span></div>`
+              : `<div class="mini-note" style="text-align:left">Tanpa target — menabung bebas.</div>`
+          }
+          <button class="btn gold" data-setor-kantung="${k.id}" style="margin-top:10px">Setor ke kantung ini</button>
+        </div>`
+          )
+          .join('')
+      : emptyState('👛', 'Belum ada kantung tabungan', 'Buat kantung untuk tiap tujuan menabungmu.');
 
     view.innerHTML = `
       <div class="card card-pad">
-        <h2 style="margin-bottom:4px">🐷 Tabunganku</h2>
-        <p style="color:var(--muted);font-size:.84rem">Total uang yang sudah kamu setor ke tabungan, dihitung otomatis dari kategori "Setor Tabungan".</p>
-
+        <h2 style="margin-bottom:4px">👛 Tabunganku</h2>
+        <p style="color:var(--muted);font-size:.84rem">Total semua kantung tabunganmu.</p>
         <div class="divider"></div>
-
-        <div class="row total"><span class="lbl">Total Tabungan</span><span class="amt pos">${rupiah(prog.terkumpul)}</span></div>
-
-        ${
-          prog.target > 0
-            ? `
-          <div class="row"><span class="lbl">Target<small>${esc(prog.namaTarget || 'Tanpa nama')}</small></span><span class="amt">${rupiah(prog.target)}</span></div>
-          <div class="progress"><span style="width:${prog.persen}%"></span></div>
-          <div class="row"><span class="lbl">${prog.tercapai ? '🎉 Target tercapai!' : 'Kurang ' + rupiah(prog.kurang) + ' lagi'}</span><span class="amt">${prog.persen}%</span></div>
-        `
-            : `<div class="note">Belum ada target menabung. Tentukan targetmu di bawah agar lebih semangat menabung!</div>`
-        }
-
-        <button class="btn gold" style="margin-top:14px" id="setorTabungan">Setor ke Tabungan</button>
+        <div class="row total"><span class="lbl">Total Tabungan</span><span class="amt pos">${rupiah(total)}</span></div>
       </div>
 
       <div class="card card-pad" style="margin-top:12px">
-        <h2 style="margin-bottom:8px">🎯 Target Menabung</h2>
-        <label class="field"><span>Nama target</span>
-          <input type="text" id="setNamaTarget" value="${esc(set.namaTarget)}" placeholder="mis. Beli sepatu baru" />
-        </label>
-        <label class="field"><span>Jumlah target (${set.mataUang})</span>
-          <input type="number" id="setTargetTabungan" value="${set.targetTabungan || ''}" min="0" placeholder="0" />
-        </label>
-        <button class="btn" id="simpanTarget">Simpan Target</button>
+        <h2 style="margin-bottom:4px">🔄 Alihkan Sisa Harian</h2>
+        <p style="color:var(--muted);font-size:.84rem;margin-bottom:10px">Uang masuk yang belum terpakai bisa langsung dipindah jadi tabungan.</p>
+        <div class="row"><span class="lbl">Sisa uang bisa ditabung</span><span class="amt ${sisa > 0 ? 'pos' : ''}">${rupiah(sisa)}</span></div>
+        ${
+          sisa > 0 && kantungList.length
+            ? `<button class="btn" id="alihkanSisa" style="margin-top:12px">Alihkan sisa ke kantung →</button>`
+            : sisa <= 0
+              ? `<div class="mini-note" style="text-align:left">Belum ada sisa untuk dialihkan. Catat uang masuk dulu ya.</div>`
+              : `<div class="mini-note" style="text-align:left">Buat kantung tabungan dulu untuk menampung sisa.</div>`
+        }
       </div>
+
+      <div class="section-head"><h2>🎯 Kantung Tabungan</h2><a href="#" id="tambahKantung">+ Buat</a></div>
+      ${kartuKantung}
 
       <div class="card card-pad" style="margin-top:12px">
         <h2 style="margin-bottom:8px">💡 Budget Harian</h2>
@@ -222,6 +250,125 @@ const UI = (() => {
         <button class="btn" id="simpanBudget">Simpan Budget</button>
       </div>
     `;
+  }
+
+  // ---- Form: buat / edit kantung tabungan ----
+  function formKantung() {
+    openModal(`
+      <h3>Buat Kantung Tabungan</h3>
+      <p class="sub">Satu kantung untuk satu tujuan menabung.</p>
+
+      <label class="field"><span>Nama tujuan</span>
+        <input type="text" id="kNama" placeholder="mis. Sepatu baru, Dandurat, HP second" maxlength="40" />
+      </label>
+
+      <label class="field"><span>Ikon</span>
+        <select id="kIkon">
+          <option value="🎯">🎯 Target</option>
+          <option value="👟">👟 Sepatu</option>
+          <option value="📱">📱 Gadget</option>
+          <option value="📚">📚 Buku</option>
+          <option value="🚲">🚲 Sepeda</option>
+          <option value="🛡️">🛡️ Darurat</option>
+          <option value="🕋">🕋 Qurban/Ibadah</option>
+          <option value="🎁">🎁 Hadiah</option>
+        </select>
+      </label>
+
+      <label class="field"><span>Target jumlah (opsional, ${s().mataUang})</span>
+        <input type="number" id="kTarget" inputmode="numeric" placeholder="0" min="0" />
+      </label>
+
+      <button class="btn" id="kSimpan">Simpan Kantung</button>
+      <button class="btn ghost" id="kBatal">Batal</button>
+    `);
+
+    modal.querySelector('#kBatal').addEventListener('click', closeModal);
+    modal.querySelector('#kSimpan').addEventListener('click', () => {
+      const nama = modal.querySelector('#kNama').value.trim();
+      if (!nama) return toast('Isi nama tujuan dulu.');
+      DB.tambahKantung({
+        nama,
+        ikon: modal.querySelector('#kIkon').value,
+        target: Number(modal.querySelector('#kTarget').value) || 0
+      });
+      closeModal();
+      toast('Kantung tabungan dibuat ✅');
+      renderTabungan();
+    });
+    setTimeout(() => modal.querySelector('#kNama').focus(), 150);
+  }
+
+  // ---- Form: setor ke kantung tertentu ----
+  function formSetorKantung(kantungId) {
+    const kantung = DB.getKantung().find((k) => k.id === kantungId);
+    if (!kantung) return;
+
+    openModal(`
+      <h3>Setor ke "${esc(kantung.nama)}"</h3>
+      <p class="sub">Masukkan jumlah yang ingin kamu tabung.</p>
+
+      <label class="field"><span>Jumlah (${s().mataUang})</span>
+        <input type="number" id="sJumlah" inputmode="numeric" placeholder="0" min="0" />
+      </label>
+      <label class="field"><span>Catatan (opsional)</span>
+        <input type="text" id="sCatatan" placeholder="mis. sisa jajan hari ini" maxlength="60" />
+      </label>
+
+      <button class="btn gold" id="sSimpan">Setor</button>
+      <button class="btn ghost" id="sBatal">Batal</button>
+    `);
+
+    modal.querySelector('#sBatal').addEventListener('click', closeModal);
+    modal.querySelector('#sSimpan').addEventListener('click', () => {
+      const jumlah = Number(modal.querySelector('#sJumlah').value);
+      if (!jumlah || jumlah <= 0) return toast('Masukkan jumlah yang valid.');
+      DB.tambahSetoran(kantungId, jumlah, 'manual', modal.querySelector('#sCatatan').value);
+      closeModal();
+      toast('Berhasil menabung ✅');
+      renderTabungan();
+    });
+    setTimeout(() => modal.querySelector('#sJumlah').focus(), 150);
+  }
+
+  // ---- Form: alihkan sisa uang harian ke sebuah kantung ----
+  function formAlihkanSisa() {
+    const sisa = Tabungan.sisaBisaDitabung();
+    const kantungList = DB.getKantung();
+    if (sisa <= 0) return toast('Belum ada sisa untuk dialihkan.');
+    if (!kantungList.length) return toast('Buat kantung tabungan dulu.');
+
+    const opsi = kantungList
+      .map((k) => `<option value="${k.id}">${esc(k.ikon)} ${esc(k.nama)}</option>`)
+      .join('');
+
+    openModal(`
+      <h3>Alihkan Sisa Harian</h3>
+      <p class="sub">Sisa uang yang belum terpakai: <b>${rupiah(sisa)}</b>. Pindahkan ke tabungan.</p>
+
+      <label class="field"><span>Pilih kantung tujuan</span>
+        <select id="aKantung">${opsi}</select>
+      </label>
+      <label class="field"><span>Jumlah dialihkan (${s().mataUang})</span>
+        <input type="number" id="aJumlah" inputmode="numeric" value="${Math.round(sisa)}" min="0" max="${Math.round(sisa)}" />
+      </label>
+
+      <button class="btn" id="aSimpan">Alihkan ke Tabungan</button>
+      <button class="btn ghost" id="aBatal">Batal</button>
+    `);
+
+    modal.querySelector('#aBatal').addEventListener('click', closeModal);
+    modal.querySelector('#aSimpan').addEventListener('click', () => {
+      let jumlah = Number(modal.querySelector('#aJumlah').value);
+      if (!jumlah || jumlah <= 0) return toast('Masukkan jumlah yang valid.');
+      if (jumlah > sisa) jumlah = sisa; // jangan melebihi sisa
+      const kantungId = modal.querySelector('#aKantung').value;
+      DB.tambahSetoran(kantungId, jumlah, 'sisa', 'Alihan sisa uang harian');
+      closeModal();
+      toast('Sisa harian dialihkan ke tabungan ✅');
+      renderTabungan();
+    });
+    setTimeout(() => modal.querySelector('#aJumlah').focus(), 150);
   }
 
   // ================================================================
@@ -314,24 +461,32 @@ const UI = (() => {
       <div class="pf-badge ${u.warna}">
         <div class="pf-badge-logo">${u.logo}</div>
         <div class="pf-badge-info">
-          <div class="pf-badge-nama">${u.nama}</div>
-          <div class="pf-badge-arti">${u.arti}</div>
+          <div class="pf-badge-nama">Level ${u.nama}</div>
+          <div class="pf-badge-arti">${esc(u.arti)}</div>
         </div>
       </div>
 
       <div class="note">${esc(u.pesan)}</div>
 
-      ${
-        u.berikutnya
-          ? `<div class="card card-pad" style="margin-top:12px">
-               <div class="row"><span class="lbl">Setoran menabung</span><span class="amt">${u.jumlahSetoran}x</span></div>
-               <div class="row"><span class="lbl">Menuju ${esc(u.berikutnya.nama)} ${u.berikutnya.logo}</span><span class="amt">${u.sisaMenujuBerikutnya}x lagi</span></div>
-             </div>`
-          : `<div class="card card-pad" style="margin-top:12px">
-               <div class="row"><span class="lbl">Setoran menabung</span><span class="amt">${u.jumlahSetoran}x</span></div>
-               <div class="row total"><span class="lbl">Status</span><span class="amt pos">Tingkat tertinggi 👑</span></div>
-             </div>`
-      }
+      <div class="card card-pad" style="margin-top:12px">
+        <div class="row"><span class="lbl">Total tabungan</span><span class="amt pos">${rupiah(u.total)}</span></div>
+        <div class="row"><span class="lbl">Kantung tabungan aktif</span><span class="amt">${u.jumlahKantung}</span></div>
+        ${
+          u.berikutnya
+            ? `<div class="progress"><span style="width:${
+                u.berikutnya.min > 0 ? Math.min(100, Math.round((u.total / u.berikutnya.min) * 100)) : 0
+              }%"></span></div>
+               <div class="row"><span class="lbl">Menuju ${esc(u.berikutnya.nama)} ${u.berikutnya.logo}</span><span class="amt">kurang ${rupiah(u.sisaMenujuBerikutnya)}</span></div>`
+            : `<div class="row total"><span class="lbl">Status</span><span class="amt pos">Level tertinggi tercapai 🕋</span></div>`
+        }
+      </div>
+
+      <div class="card card-pad" style="margin-top:12px">
+        <div style="color:var(--muted);font-size:.78rem;margin-bottom:6px">TARGET LEVEL INI</div>
+        <div style="font-weight:700;margin-bottom:8px">${esc(u.target)}</div>
+        <div style="color:var(--muted);font-size:.78rem;margin-bottom:4px">PENCAPAIAN</div>
+        <div style="font-size:.9rem;line-height:1.5">${esc(u.realistis)}</div>
+      </div>
 
       <div class="section-head"><h2>Semua Tingkatan</h2></div>
       <div class="pf-levels">${dotTingkat}</div>
@@ -366,7 +521,9 @@ const UI = (() => {
     const jenis = (preset && preset.jenis) || 'pengeluaran';
     const opsiAkun = (j) =>
       akun
-        .filter((a) => a.jenis === j)
+        // Kategori 'tabungan' disembunyikan dari form manual; menabung
+        // dilakukan lewat halaman Tabungan (kantung) agar lebih terarah.
+        .filter((a) => a.jenis === j && a.id !== 'tabungan')
         .map((a) => `<option value="${a.id}">${a.ikon} ${esc(a.nama)}</option>`)
         .join('');
 
@@ -468,16 +625,29 @@ const UI = (() => {
       return;
     }
 
-    // ---- Tabungan & Target ----
-    if (e.target.id === 'setorTabungan') {
-      formTransaksi({ jenis: 'pengeluaran', akunId: 'tabungan' });
+    // ---- Tabungan (kantung) ----
+    if (e.target.id === 'tambahKantung') {
+      e.preventDefault();
+      formKantung();
+      return;
     }
-    if (e.target.id === 'simpanTarget') {
-      const nama = document.getElementById('setNamaTarget').value.trim();
-      const target = Number(document.getElementById('setTargetTabungan').value) || 0;
-      DB.setSettings({ namaTarget: nama, targetTabungan: target });
-      toast('Target menabung disimpan.');
-      renderTabungan();
+    const setorBtn = e.target.closest('[data-setor-kantung]');
+    if (setorBtn) {
+      formSetorKantung(setorBtn.dataset.setorKantung);
+      return;
+    }
+    const hapusKantungBtn = e.target.closest('[data-hapus-kantung]');
+    if (hapusKantungBtn) {
+      if (confirm('Hapus kantung ini beserta riwayat setorannya?')) {
+        DB.hapusKantung(hapusKantungBtn.dataset.hapusKantung);
+        toast('Kantung dihapus.');
+        renderTabungan();
+      }
+      return;
+    }
+    if (e.target.id === 'alihkanSisa') {
+      formAlihkanSisa();
+      return;
     }
     if (e.target.id === 'simpanBudget') {
       const budget = Number(document.getElementById('setBudgetHarian').value) || 0;
