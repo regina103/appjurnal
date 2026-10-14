@@ -47,7 +47,7 @@ catch {
 
 Write-Host ""
 Write-Host "========================================================" -ForegroundColor Green
-Write-Host "  Jurnal Keuangan Syariah - server lokal aktif" -ForegroundColor Green
+Write-Host "  I'MNote - server lokal aktif" -ForegroundColor Green
 Write-Host "========================================================" -ForegroundColor Green
 Write-Host "  Buka di browser : $prefix" -ForegroundColor Cyan
 Write-Host "  Folder          : $root"

@@ -42,24 +42,31 @@
       banner.hidden = false;
     }
   } else {
-    // Tentukan tampilan awal berdasarkan sesi tersimpan.
-    Auth.sesiSekarang().then((sesi) => {
-      if (sesi) {
-        AuthUI.sembunyikanGate();
-      } else {
-        AuthUI.tampilkanGate();
-      }
-    });
+    // Tampilkan gate dulu sebagai keadaan awal agar tidak ada layar kosong
+    // sebelum status login diketahui.
+    AuthUI.tampilkanGate();
 
-    // Pantau perubahan status login secara real-time.
+    // onAuthStateChange adalah SATU-SATUNYA pengatur gate. Di Supabase v2,
+    // callback ini otomatis dipanggil sekali saat dipasang (INITIAL_SESSION),
+    // jadi tidak perlu cek sesi terpisah (menghindari race condition).
+    let sudahPernahLogin = false;
     Auth.pantauPerubahan((user) => {
       const logoutBtn = document.getElementById('logoutBtn');
       if (user) {
         AuthUI.sembunyikanGate();
         if (logoutBtn) logoutBtn.hidden = false;
+        // Segarkan tampilan setelah masuk agar data terbaru tampil.
+        UI.render(UI.currentPage);
+        sudahPernahLogin = true;
       } else {
-        AuthUI.tampilkanGate();
         if (logoutBtn) logoutBtn.hidden = true;
+        // Bersihkan cache profil agar user berikutnya tidak melihat data lama.
+        UI.resetProfilCache();
+        // Hanya saat benar-benar logout (bukan keadaan awal), kembali ke beranda.
+        if (sudahPernahLogin) {
+          UI.navigate('beranda');
+        }
+        AuthUI.tampilkanGate();
       }
     });
   }
@@ -75,11 +82,11 @@
     const btn = document.getElementById('themeToggle');
     if (mode === 'gelap') {
       document.documentElement.setAttribute('data-theme', 'gelap');
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0f1715');
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#2a241f');
       btn.textContent = '☀️';
     } else {
       document.documentElement.removeAttribute('data-theme');
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0e7c66');
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#c67e92');
       btn.textContent = '🌙';
     }
   }

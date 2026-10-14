@@ -269,6 +269,96 @@ const UI = (() => {
   }
 
   // ================================================================
+  //  HALAMAN: PROFIL
+  // ================================================================
+  let _profilCache = null; // { id, email, nama, avatar_url }
+
+  function inisialHuruf(nama, email) {
+    const sumber = (nama && nama.trim()) || (email || '');
+    return (sumber.trim()[0] || '🙂').toUpperCase();
+  }
+
+  function renderProfil() {
+    const u = Pencapaian.tingkatSekarang();
+    const nama = (_profilCache && _profilCache.nama) || '';
+    const email = (_profilCache && _profilCache.email) || '';
+    const avatar = (_profilCache && _profilCache.avatar_url) || '';
+
+    const avatarHtml = avatar
+      ? `<img src="${esc(avatar)}" alt="Foto profil" class="pf-avatar-img" />`
+      : `<div class="pf-avatar-inisial">${esc(inisialHuruf(nama, email))}</div>`;
+
+    const dotTingkat = Pencapaian.TINGKAT
+      .slice()
+      .reverse()
+      .map(
+        (t) =>
+          `<div class="pf-level ${t.id === u.id ? 'aktif ' + t.warna : ''}">
+             <span class="pf-level-logo">${t.logo}</span>
+             <span class="pf-level-nama">${t.nama}</span>
+           </div>`
+      )
+      .join('');
+
+    view.innerHTML = `
+      <div class="pf-head ${u.warna}">
+        <div class="pf-avatar-wrap">
+          ${avatarHtml}
+          <button class="pf-avatar-edit" id="pfGantiFoto" title="Ganti foto">📷</button>
+          <input type="file" id="pfFileFoto" accept="image/*" hidden />
+        </div>
+        <div class="pf-nama">${esc(nama || 'Pelajar Hebat')}</div>
+        <div class="pf-email">${esc(email)}</div>
+      </div>
+
+      <div class="pf-badge ${u.warna}">
+        <div class="pf-badge-logo">${u.logo}</div>
+        <div class="pf-badge-info">
+          <div class="pf-badge-nama">${u.nama}</div>
+          <div class="pf-badge-arti">${u.arti}</div>
+        </div>
+      </div>
+
+      <div class="note">${esc(u.pesan)}</div>
+
+      ${
+        u.berikutnya
+          ? `<div class="card card-pad" style="margin-top:12px">
+               <div class="row"><span class="lbl">Setoran menabung</span><span class="amt">${u.jumlahSetoran}x</span></div>
+               <div class="row"><span class="lbl">Menuju ${esc(u.berikutnya.nama)} ${u.berikutnya.logo}</span><span class="amt">${u.sisaMenujuBerikutnya}x lagi</span></div>
+             </div>`
+          : `<div class="card card-pad" style="margin-top:12px">
+               <div class="row"><span class="lbl">Setoran menabung</span><span class="amt">${u.jumlahSetoran}x</span></div>
+               <div class="row total"><span class="lbl">Status</span><span class="amt pos">Tingkat tertinggi 👑</span></div>
+             </div>`
+      }
+
+      <div class="section-head"><h2>Semua Tingkatan</h2></div>
+      <div class="pf-levels">${dotTingkat}</div>
+
+      <div class="card card-pad" style="margin-top:12px">
+        <h2 style="margin-bottom:8px">Edit Profil</h2>
+        <label class="field"><span>Nama tampilan</span>
+          <input type="text" id="pfNama" value="${esc(nama)}" placeholder="mis. Siti Aminah" maxlength="60" />
+        </label>
+        <button class="btn" id="pfSimpanNama">Simpan Nama</button>
+      </div>
+
+      <button class="btn danger" id="pfKeluar" style="margin-top:16px">🚪 Keluar dari Akun</button>
+    `;
+
+    // Muat data profil dari Supabase (sekali), lalu render ulang bila berubah.
+    if (!_profilCache && window.Profil) {
+      Profil.ambil().then((p) => {
+        if (p) {
+          _profilCache = p;
+          if (currentPage === 'profil') renderProfil();
+        }
+      });
+    }
+  }
+
+  // ================================================================
   //  FORM TRANSAKSI
   // ================================================================
   function formTransaksi(preset) {
@@ -414,16 +504,59 @@ const UI = (() => {
         render(currentPage);
       }
     }
+
+    // ---- Profil ----
+    if (e.target.id === 'pfGantiFoto') {
+      const inp = document.getElementById('pfFileFoto');
+      if (inp) inp.click();
+    }
+    if (e.target.id === 'pfSimpanNama') {
+      const nama = (document.getElementById('pfNama').value || '').trim();
+      const btn = e.target;
+      btn.disabled = true;
+      Profil.simpanNama(nama).then((r) => {
+        btn.disabled = false;
+        if (r.ok) {
+          _profilCache = Object.assign({}, _profilCache, { nama });
+          toast('Nama tersimpan ✅');
+          renderProfil();
+        } else {
+          toast(r.pesan || 'Gagal menyimpan.');
+        }
+      });
+    }
+    if (e.target.id === 'pfKeluar') {
+      Auth.keluar();
+    }
+  });
+
+  // Tangani pemilihan file foto profil (change, bukan click).
+  view.addEventListener('change', (e) => {
+    if (e.target && e.target.id === 'pfFileFoto') {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      toast('Mengunggah foto...');
+      Profil.unggahFoto(file).then((r) => {
+        if (r.ok) {
+          _profilCache = Object.assign({}, _profilCache, { avatar_url: r.url });
+          toast('Foto profil diperbarui ✅');
+          renderProfil();
+        } else {
+          toast(r.pesan || 'Gagal mengunggah foto.');
+        }
+      });
+    }
   });
 
   // ================================================================
   //  NAVIGASI
   // ================================================================
   const PAGES = {
-    beranda: { title: "I'mNote", render: renderBeranda },
+    beranda: { title: "I'MNote", render: renderBeranda },
     transaksi: { title: 'Transaksi', render: renderTransaksi },
     tabungan: { title: 'Tabungan & Target', render: renderTabungan },
-    laporan: { title: 'Laporan Keuangan', render: renderLaporan }
+    laporan: { title: 'Laporan Keuangan', render: renderLaporan },
+    profil: { title: 'Profil', render: renderProfil }
   };
 
   function render(page) {
@@ -441,5 +574,18 @@ const UI = (() => {
     view.scrollTo && window.scrollTo(0, 0);
   }
 
-  return { navigate, formTransaksi, toast, render, get currentPage() { return currentPage; } };
+  function resetProfilCache() {
+    _profilCache = null;
+  }
+
+  return {
+    navigate,
+    formTransaksi,
+    toast,
+    render,
+    resetProfilCache,
+    get currentPage() {
+      return currentPage;
+    }
+  };
 })();

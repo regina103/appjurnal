@@ -37,13 +37,22 @@ const AuthUI = (() => {
     gate.innerHTML = `
       <div class="auth-box">
         <div class="auth-logo">💰</div>
-        <div class="auth-brand">I'mNote</div>
+        <div class="auth-brand">I'MNote</div>
         <h1 class="auth-judul">${judul}</h1>
         <p class="auth-sub">${sub}</p>
 
         <div class="auth-pesan" id="authPesan" hidden></div>
 
         <form id="authForm" novalidate>
+          ${
+            mode === 'daftar'
+              ? `<label class="field"><span>Nama</span>
+                   <input type="text" id="authNama" autocomplete="name"
+                          placeholder="Nama kamu" maxlength="60" required />
+                 </label>`
+              : ''
+          }
+
           <label class="field"><span>Email</span>
             <input type="email" id="authEmail" autocomplete="email"
                    inputmode="email" placeholder="nama@email.com" required />
@@ -91,7 +100,14 @@ const AuthUI = (() => {
       e.preventDefault();
       const email = document.getElementById('authEmail').value;
       const password = document.getElementById('authPassword').value;
+      const namaEl = document.getElementById('authNama');
+      const nama = namaEl ? namaEl.value : '';
       const btn = document.getElementById('authSubmit');
+
+      if (mode === 'daftar' && !nama.trim()) {
+        tampilBanner('Isi nama kamu dulu ya.', 'error');
+        return;
+      }
 
       btn.disabled = true;
       const labelAsli = btn.textContent;
@@ -101,10 +117,13 @@ const AuthUI = (() => {
       const hasil =
         mode === 'masuk'
           ? await Auth.masuk(email, password)
-          : await Auth.daftar(email, password);
+          : await Auth.daftar(email, password, nama);
 
-      btn.disabled = false;
-      btn.textContent = labelAsli;
+      // Elemen bisa sudah lepas dari DOM bila gate ditutup saat login sukses.
+      if (btn.isConnected) {
+        btn.disabled = false;
+        btn.textContent = labelAsli;
+      }
 
       if (!hasil.ok) {
         tampilBanner(hasil.pesan, 'error');

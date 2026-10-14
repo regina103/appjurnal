@@ -1,13 +1,13 @@
 {
-  "name": "I'mNote",
-  "short_name": "I'mNote",
+  "name": "I'MNote",
+  "short_name": "I'MNote",
   "description": "Aplikasi pencatatan keuangan untuk pelajar: catat uang saku, atur pengeluaran, tetapkan budget harian, dan menabung untuk target.",
   "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f4faf7",
-  "theme_color": "#0e7c66",
+  "background_color": "#f7f1e7",
+  "theme_color": "#c67e92",
   "lang": "id",
   "icons": [
     {

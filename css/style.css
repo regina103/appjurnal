@@ -1,54 +1,77 @@
 /* =====================================================================
-   style.css — Tampilan mobile-first, cerah & penuh warna.
-   Palet: toska, ungu, oranye, pink, biru, emas.
+   style.css — Tampilan mobile-first, hangat & lembut.
+   Palet: cream (background) dipadu dusty rose, sage, lavender, bronze.
+   Nuansa simpel, fun, dan ramah untuk pelajar.
    ===================================================================== */
 
 :root {
-  --primary: #0ea47f;
-  --primary-dark: #0b7d63;
-  --primary-light: #d8f5ec;
+  /* Warna utama = dusty rose */
+  --primary: #c67e92;
+  --primary-dark: #a9617a;
+  --primary-light: #f4e2e7;
 
-  --purple: #7c5cff;
-  --purple-light: #ece7ff;
-  --orange: #ff8a3d;
-  --orange-light: #ffe9db;
-  --pink: #ff5d8f;
-  --pink-light: #ffe0ea;
-  --blue: #3d8bff;
-  --blue-light: #dfecff;
-  --gold: #f5a623;
-  --gold-light: #fff0d6;
+  /* Sage (hijau lembut) */
+  --sage: #94a67d;
+  --sage-dark: #76895f;
+  --sage-light: #e7edde;
 
-  --danger: #f0455f;
-  --success: #15b67e;
+  /* Lavender (ungu lembut) */
+  --lavender: #a596c6;
+  --lavender-dark: #8574ab;
+  --lavender-light: #ece7f4;
 
-  --bg: #f3f6fb;
-  --card: #ffffff;
-  --text: #1b2440;
-  --muted: #7b86a3;
-  --border: #eceff6;
-  --shadow: 0 6px 20px rgba(45, 55, 95, 0.08);
-  --shadow-lg: 0 12px 30px rgba(45, 55, 95, 0.14);
+  /* Bronze (coklat keemasan) */
+  --bronze: #b6894f;
+  --bronze-dark: #956d3a;
+  --bronze-light: #f3e8d6;
+
+  /* Dusty rose sebagai aksen (alias dari primary) */
+  --rose: #c67e92;
+  --rose-light: #f4e2e7;
+
+  --danger: #cf6b6b;
+  --success: #7a9a6e;
+
+  /* Cream */
+  --bg: #f7f1e7;
+  --card: #fffdf8;
+  --text: #4a4038;
+  --muted: #9c9185;
+  --border: #ece2d4;
+  --shadow: 0 6px 20px rgba(120, 95, 70, 0.08);
+  --shadow-lg: 0 12px 30px rgba(120, 95, 70, 0.16);
   --radius: 18px;
   --nav-h: 66px;
 }
 
 [data-theme='gelap'] {
-  --primary: #1dc89b;
-  --primary-dark: #12a07c;
-  --primary-light: #15362e;
+  --primary: #d79aab;
+  --primary-dark: #c67e92;
+  --primary-light: #3a2b31;
 
-  --purple-light: #241f3f;
-  --orange-light: #3a2a1c;
-  --pink-light: #3a1f2a;
-  --blue-light: #1c2a40;
-  --gold-light: #3a2f17;
+  --sage: #a9bb92;
+  --sage-dark: #94a67d;
+  --sage-light: #2b3327;
 
-  --bg: #0e1322;
-  --card: #182036;
-  --text: #e9eefc;
-  --muted: #93a0c0;
-  --border: #26304d;
+  --lavender: #bcb0d6;
+  --lavender-dark: #a596c6;
+  --lavender-light: #2f2a3a;
+
+  --bronze: #cfa066;
+  --bronze-dark: #b6894f;
+  --bronze-light: #3a3023;
+
+  --rose: #d79aab;
+  --rose-light: #3a2b31;
+
+  --danger: #e38a8a;
+  --success: #9bb98c;
+
+  --bg: #2a241f;
+  --card: #342d26;
+  --text: #f3ece0;
+  --muted: #b2a695;
+  --border: #463d33;
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.5);
 }
@@ -81,10 +104,10 @@ body { overscroll-behavior: none; }
   position: sticky;
   top: 0;
   z-index: 20;
-  background: linear-gradient(135deg, #0ea47f 0%, #0bbfa0 45%, #3d8bff 120%);
+  background: linear-gradient(135deg, #c67e92 0%, #cf9a93 50%, #b6894f 130%);
   color: #fff;
   padding: env(safe-area-inset-top) 0 0;
-  box-shadow: 0 4px 18px rgba(14, 164, 127, 0.3);
+  box-shadow: 0 4px 18px rgba(166, 97, 122, 0.28);
 }
 .header-inner {
   display: flex;
@@ -114,11 +137,11 @@ body { overscroll-behavior: none; }
 
 /* ---------- Kartu saldo (beranda) ---------- */
 .balance-card {
-  background: linear-gradient(135deg, #7c5cff 0%, #9b7bff 50%, #ff5d8f 130%);
+  background: linear-gradient(135deg, #a596c6 0%, #c6a0bb 55%, #c67e92 130%);
   color: #fff;
   border-radius: 24px;
   padding: 24px;
-  box-shadow: 0 14px 34px rgba(124, 92, 255, 0.35);
+  box-shadow: 0 14px 34px rgba(165, 150, 198, 0.4);
   position: relative;
   overflow: hidden;
 }
@@ -169,8 +192,8 @@ body { overscroll-behavior: none; }
   position: relative;
   overflow: hidden;
 }
-.stat:nth-child(1) { background: linear-gradient(135deg, #ff8a3d, #ff5d8f); }
-.stat:nth-child(2) { background: linear-gradient(135deg, #3d8bff, #7c5cff); }
+.stat:nth-child(1) { background: linear-gradient(135deg, #94a67d, #aebb95); }
+.stat:nth-child(2) { background: linear-gradient(135deg, #a596c6, #c6a0bb); }
 .stat .ico { font-size: 1.5rem; }
 .stat .val { font-size: 1.15rem; font-weight: 800; margin-top: 8px; }
 .stat .cap { font-size: .76rem; opacity: .9; }
@@ -223,7 +246,7 @@ body { overscroll-behavior: none; }
   font-size: 1rem; padding: 6px; cursor: pointer; border-radius: 8px;
   transition: background .15s;
 }
-.tx-del:active { background: var(--pink-light); }
+.tx-del:active { background: var(--rose-light); }
 
 .badge {
   display: inline-block;
@@ -235,7 +258,7 @@ body { overscroll-behavior: none; }
   margin-left: 6px;
   font-weight: 600;
 }
-.badge.warn { background: var(--orange-light); color: #b35900; }
+.badge.warn { background: var(--bronze-light); color: var(--bronze-dark); }
 
 /* ---------- Empty state ---------- */
 .empty {
@@ -253,12 +276,12 @@ body { overscroll-behavior: none; }
   bottom: calc(var(--nav-h) + 18px);
   width: 60px; height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff8a3d, #ff5d8f);
+  background: linear-gradient(135deg, #c67e92, #b6894f);
   color: #fff;
   border: none;
   font-size: 2rem;
   line-height: 1;
-  box-shadow: 0 8px 22px rgba(255, 93, 143, 0.5);
+  box-shadow: 0 8px 22px rgba(182, 137, 79, 0.45);
   cursor: pointer;
   z-index: 25;
   transition: transform .18s;
@@ -293,7 +316,7 @@ body { overscroll-behavior: none; }
 }
 .nav-item .nav-ico { font-size: 1.3rem; filter: grayscale(.5) opacity(.7); transition: all .2s; }
 .nav-item.active { color: var(--primary); font-weight: 700; }
-.nav-item.active .nav-ico { filter: none; transform: translateY(-2px) scale(1.1); }
+.nav-item.active .nav-ico { filter: none; transform: translateY(-2px) scale(1.15); }
 .nav-item.active::before {
   content: '';
   position: absolute;
@@ -304,10 +327,22 @@ body { overscroll-behavior: none; }
   z-index: -1;
 }
 
+/* Tiap menu punya identitas warnanya sendiri — simpel & fun */
+.nav-item:nth-child(1).active { color: var(--rose); }
+.nav-item:nth-child(1).active::before { background: var(--rose-light); }
+.nav-item:nth-child(2).active { color: var(--sage-dark); }
+.nav-item:nth-child(2).active::before { background: var(--sage-light); }
+.nav-item:nth-child(3).active { color: var(--lavender-dark); }
+.nav-item:nth-child(3).active::before { background: var(--lavender-light); }
+.nav-item:nth-child(4).active { color: var(--bronze-dark); }
+.nav-item:nth-child(4).active::before { background: var(--bronze-light); }
+.nav-item:nth-child(5).active { color: var(--primary-dark); }
+.nav-item:nth-child(5).active::before { background: var(--rose-light); }
+
 /* ---------- Form & modal ---------- */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(27, 36, 64, 0.55);
+  background: rgba(74, 64, 56, 0.5);
   backdrop-filter: blur(3px);
   display: flex; align-items: flex-end; justify-content: center;
   z-index: 50;
@@ -359,26 +394,26 @@ textarea { resize: vertical; min-height: 60px; }
   font-weight: 700; color: var(--muted); cursor: pointer;
   transition: all .15s;
 }
-.seg button.on.in { background: linear-gradient(135deg,#15b67e,#0ea47f); color:#fff; border-color: transparent;}
-.seg button.on.out { background: linear-gradient(135deg,#f0455f,#ff5d8f); color:#fff; border-color: transparent;}
+.seg button.on.in { background: linear-gradient(135deg,#94a67d,#aebb95); color:#fff; border-color: transparent;}
+.seg button.on.out { background: linear-gradient(135deg,#c67e92,#d79aab); color:#fff; border-color: transparent;}
 
 .btn {
   width: 100%;
   padding: 16px;
   border: none;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--primary), #0bbfa0);
+  background: linear-gradient(135deg, var(--primary), #d79aab);
   color: #fff;
   font-size: 1.02rem;
   font-weight: 800;
   cursor: pointer;
   transition: transform .12s, opacity .12s;
-  box-shadow: 0 6px 16px rgba(14,164,127,.35);
+  box-shadow: 0 6px 16px rgba(166,97,122,.32);
 }
 .btn:active { transform: scale(.97); }
 .btn.ghost { background: transparent; color: var(--muted); box-shadow:none; margin-top: 6px;}
-.btn.gold { background: linear-gradient(135deg,#f5a623,#ff8a3d); box-shadow: 0 6px 16px rgba(245,166,35,.35);}
-.btn.danger { background: linear-gradient(135deg,#f0455f,#ff5d8f); box-shadow: 0 6px 16px rgba(240,69,95,.3);}
+.btn.gold { background: linear-gradient(135deg,#b6894f,#cfa066); box-shadow: 0 6px 16px rgba(182,137,79,.35);}
+.btn.danger { background: linear-gradient(135deg,#cf6b6b,#dd8a8a); box-shadow: 0 6px 16px rgba(207,107,107,.3);}
 
 /* ---------- Baris laporan ---------- */
 .row {
@@ -394,11 +429,11 @@ textarea { resize: vertical; min-height: 60px; }
 .pos { color: var(--success); }
 .neg { color: var(--danger); }
 
-/* ---------- Progress (haul) ---------- */
+/* ---------- Progress (target tabungan & budget) ---------- */
 .progress {
   height: 12px; background: var(--border); border-radius: 20px; overflow: hidden; margin: 10px 0;
 }
-.progress > span { display:block; height:100%; background: linear-gradient(90deg,#f5a623,#ff8a3d, #ff5d8f); border-radius:20px; transition: width .5s;}
+.progress > span { display:block; height:100%; background: linear-gradient(90deg,#94a67d,#b6894f, #c67e92); border-radius:20px; transition: width .5s;}
 
 .note {
   background: var(--primary-light);
@@ -409,7 +444,7 @@ textarea { resize: vertical; min-height: 60px; }
   line-height: 1.55;
   margin-top: 12px;
 }
-.note.warn { background: var(--orange-light); color:#a35200; }
+.note.warn { background: var(--bronze-light); color: var(--bronze-dark); }
 
 /* ---------- Chip kategori ---------- */
 .chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 14px;}
@@ -418,14 +453,14 @@ textarea { resize: vertical; min-height: 60px; }
   background: var(--card); border: 1.5px solid var(--border); color: var(--muted); cursor:pointer;
   transition: all .15s;
 }
-.chip.on { background: linear-gradient(135deg, var(--primary), #0bbfa0); color:#fff; border-color: transparent; box-shadow: 0 4px 12px rgba(14,164,127,.3);}
+.chip.on { background: linear-gradient(135deg, var(--primary), #d79aab); color:#fff; border-color: transparent; box-shadow: 0 4px 12px rgba(166,97,122,.28);}
 
 /* ---------- Toast ---------- */
 .toast {
   position: fixed;
   bottom: calc(var(--nav-h) + 84px);
   left: 50%; transform: translateX(-50%);
-  background: linear-gradient(135deg, #1b2440, #2d3760);
+  background: linear-gradient(135deg, #5c4f44, #7a6a59);
   color: #fff;
   padding: 13px 22px;
   border-radius: 30px;
@@ -464,10 +499,10 @@ textarea { resize: vertical; min-height: 60px; }
 .social-tile .s-ico { font-size: 1.6rem; }
 .social-tile .s-lbl { font-size: .8rem; opacity: .95; margin-top: 6px; font-weight: 600; }
 .social-tile .s-amt { font-size: 1.05rem; font-weight: 800; margin-top: 2px; }
-.social-tile.zakat   { background: linear-gradient(135deg,#0ea47f,#0bbfa0); }
-.social-tile.infak   { background: linear-gradient(135deg,#7c5cff,#9b7bff); }
-.social-tile.sedekah { background: linear-gradient(135deg,#ff5d8f,#ff8ab0); }
-.social-tile.wakaf   { background: linear-gradient(135deg,#3d8bff,#5aa0ff); }
+.social-tile.zakat   { background: linear-gradient(135deg,#94a67d,#aebb95); }
+.social-tile.infak   { background: linear-gradient(135deg,#a596c6,#bcb0d6); }
+.social-tile.sedekah { background: linear-gradient(135deg,#c67e92,#d79aab); }
+.social-tile.wakaf   { background: linear-gradient(135deg,#b6894f,#cfa066); }
 
 /* =====================================================================
    Gerbang Autentikasi (login / daftar)
@@ -482,7 +517,7 @@ textarea { resize: vertical; min-height: 60px; }
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: linear-gradient(160deg, #0ea47f 0%, #3d8bff 60%, #7c5cff 120%);
+  background: linear-gradient(160deg, #c67e92 0%, #a596c6 55%, #94a67d 120%);
   overflow-y: auto;
 }
 
@@ -529,3 +564,102 @@ textarea { resize: vertical; min-height: 60px; }
 
 .auth-alt { text-align: center; color: var(--muted); font-size: .88rem; margin-top: 16px; }
 .auth-alt a { color: var(--primary); font-weight: 700; text-decoration: none; }
+
+/* =====================================================================
+   Halaman Profil & Pencapaian
+   ===================================================================== */
+.pf-head {
+  text-align: center;
+  padding: 26px 20px 22px;
+  border-radius: 24px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #c67e92, #a596c6 130%);
+  box-shadow: var(--shadow);
+}
+.pf-head.muhafiz { background: linear-gradient(135deg, #94a67d, #aebb95); }
+.pf-head.munfiq  { background: linear-gradient(135deg, #a596c6, #bcb0d6); }
+.pf-head.warits  { background: linear-gradient(135deg, #b6894f, #cfa066); }
+
+.pf-avatar-wrap {
+  position: relative;
+  width: 96px; height: 96px;
+  margin: 0 auto 12px;
+}
+.pf-avatar-img,
+.pf-avatar-inisial {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,.75);
+  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  background: rgba(255,255,255,.25);
+}
+.pf-avatar-inisial {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.4rem; font-weight: 800; color: #fff;
+}
+.pf-avatar-edit {
+  position: absolute;
+  right: -2px; bottom: -2px;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: var(--card);
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: var(--shadow);
+}
+.pf-avatar-edit:active { transform: scale(.9); }
+.pf-nama { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; }
+.pf-email { font-size: .85rem; opacity: .9; margin-top: 2px; }
+
+/* Kartu badge tingkat */
+.pf-badge {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.pf-badge-logo {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: grid; place-items: center;
+  font-size: 1.9rem;
+  flex-shrink: 0;
+}
+.pf-badge.muhafiz .pf-badge-logo { background: var(--sage-light); }
+.pf-badge.munfiq  .pf-badge-logo { background: var(--lavender-light); }
+.pf-badge.warits  .pf-badge-logo { background: var(--bronze-light); }
+.pf-badge-nama { font-size: 1.15rem; font-weight: 800; }
+.pf-badge.muhafiz .pf-badge-nama { color: var(--sage-dark); }
+.pf-badge.munfiq  .pf-badge-nama { color: var(--lavender-dark); }
+.pf-badge.warits  .pf-badge-nama { color: var(--bronze-dark); }
+.pf-badge-arti { font-size: .82rem; color: var(--muted); margin-top: 2px; }
+
+/* Daftar semua tingkatan */
+.pf-levels { display: flex; gap: 10px; }
+.pf-level {
+  flex: 1;
+  text-align: center;
+  padding: 14px 8px;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  opacity: .55;
+  transition: all .2s;
+}
+.pf-level-logo { font-size: 1.6rem; display: block; filter: grayscale(.4); }
+.pf-level-nama { font-size: .74rem; font-weight: 700; color: var(--muted); margin-top: 6px; display: block; }
+.pf-level.aktif { opacity: 1; transform: translateY(-2px); border-color: transparent; }
+.pf-level.aktif .pf-level-logo { filter: none; }
+.pf-level.aktif.muhafiz { background: var(--sage-light); }
+.pf-level.aktif.muhafiz .pf-level-nama { color: var(--sage-dark); }
+.pf-level.aktif.munfiq { background: var(--lavender-light); }
+.pf-level.aktif.munfiq .pf-level-nama { color: var(--lavender-dark); }
+.pf-level.aktif.warits { background: var(--bronze-light); }
+.pf-level.aktif.warits .pf-level-nama { color: var(--bronze-dark); }

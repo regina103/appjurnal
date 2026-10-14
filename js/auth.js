@@ -51,18 +51,26 @@ const Auth = (() => {
     return null;
   }
 
-  async function daftar(email, password) {
+  async function daftar(email, password, nama) {
     if (!tersedia())
       return { ok: false, pesan: 'Backend belum dikonfigurasi.' };
     const salah = validasiInput(email, password);
     if (salah) return { ok: false, pesan: salah };
 
+    const namaBersih = String(nama || '').trim().slice(0, 60);
+
     try {
       const { data, error } = await sb().auth.signUp({
         email: email.trim(),
-        password
+        password,
+        options: { data: { nama: namaBersih } }
       });
       if (error) return { ok: false, pesan: terjemahkanError(error) };
+
+      // Bila sesi langsung terbentuk (auto-confirm), simpan nama ke tabel profil.
+      if (data.session && namaBersih && window.Profil) {
+        Profil.simpanNama(namaBersih).catch(() => {});
+      }
 
       // Bila konfirmasi email diaktifkan, session belum ada sampai user verifikasi.
       const perluVerifikasi = !data.session;

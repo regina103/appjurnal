@@ -1,14 +1,16 @@
 // Service Worker sederhana: cache aset agar aplikasi bisa dibuka offline.
-const CACHE = 'imnote-v5';
+const CACHE = 'imnote-v7';
 const ASSETS = [
   'index.html',
   'manifest.json',
   'css/style.css',
   'js/supabase-client.js',
   'js/auth.js',
+  'js/profil.js',
   'js/auth-ui.js',
   'js/db.js',
   'js/tabungan.js',
+  'js/pencapaian.js',
   'js/laporan.js',
   'js/ui.js',
   'js/app.js',

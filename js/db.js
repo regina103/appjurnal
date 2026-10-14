@@ -1,6 +1,6 @@
 /* =====================================================================
    db.js — Lapisan penyimpanan data (localStorage)
-   Mengelola: akun syariah, transaksi, dan pengaturan.
+   Mengelola: kategori akun, transaksi, dan pengaturan.
    Data disimpan lokal di perangkat, tidak dikirim ke mana pun.
    ===================================================================== */
 
