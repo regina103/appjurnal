@@ -17,18 +17,23 @@ const DB = (() => {
   // Kategori disusun agar sesuai keseharian pelajar: uang saku, jajan,
   // kebutuhan sekolah, menabung, dan sedekah.
   const DEFAULT_ACCOUNTS = [
-    // Pemasukan (uang masuk) — relevan untuk pelajar
-    { id: 'uangsaku',   nama: 'Uang Saku',                 jenis: 'pemasukan',   dana: 'halal', ikon: '💵' },
+    // ===== Pemasukan (uang masuk) — sumber uang khas pelajar =====
+    { id: 'uangsaku',   nama: 'Uang Saku Harian',          jenis: 'pemasukan',   dana: 'halal', ikon: '💵' },
+    { id: 'uangbulanan',nama: 'Uang Saku Mingguan/Bulanan',jenis: 'pemasukan',   dana: 'halal', ikon: '📅' },
     { id: 'hadiah',     nama: 'Hadiah / Pemberian',        jenis: 'pemasukan',   dana: 'halal', ikon: '🎁' },
+    { id: 'prestasi',   nama: 'Hadiah Lomba / Prestasi',   jenis: 'pemasukan',   dana: 'halal', ikon: '🏆' },
     { id: 'sisatabung', nama: 'Tabungan / Sisa',           jenis: 'pemasukan',   dana: 'halal', ikon: '👛' },
     { id: 'masuklain',  nama: 'Pemasukan Lainnya',         jenis: 'pemasukan',   dana: 'halal', ikon: '➕' },
 
-    // Pengeluaran (uang keluar) — relevan untuk pelajar
-    { id: 'jajan',      nama: 'Jajan / Makan',             jenis: 'pengeluaran', dana: 'halal', ikon: '🍔' },
+    // ===== Pengeluaran (uang keluar) — kebutuhan sehari-hari pelajar =====
+    { id: 'jajan',      nama: 'Jajan / Makan & Minum',     jenis: 'pengeluaran', dana: 'halal', ikon: '🍔' },
     { id: 'alattulis',  nama: 'Alat Tulis & Buku',         jenis: 'pengeluaran', dana: 'halal', ikon: '✏️' },
+    { id: 'fotokopi',   nama: 'Fotokopi & Print',          jenis: 'pengeluaran', dana: 'halal', ikon: '🖨️' },
+    { id: 'kas',        nama: 'Uang Kas / Iuran',          jenis: 'pengeluaran', dana: 'halal', ikon: '🧾' },
     { id: 'sekolah',    nama: 'Keperluan Sekolah',         jenis: 'pengeluaran', dana: 'halal', ikon: '🏫' },
     { id: 'transport',  nama: 'Transport / Ongkos',        jenis: 'pengeluaran', dana: 'halal', ikon: '🚌' },
     { id: 'pulsa',      nama: 'Pulsa / Kuota',             jenis: 'pengeluaran', dana: 'halal', ikon: '📱' },
+    { id: 'hiburan',    nama: 'Hiburan / Main',            jenis: 'pengeluaran', dana: 'halal', ikon: '🎮' },
     { id: 'sedekah',    nama: 'Sedekah / Infak',           jenis: 'pengeluaran', dana: 'halal', ikon: '🤲' },
     { id: 'tabungan',   nama: 'Setor Tabungan',            jenis: 'pengeluaran', dana: 'halal', ikon: '👛' },
     { id: 'lainnya',    nama: 'Pengeluaran Lainnya',       jenis: 'pengeluaran', dana: 'halal', ikon: '📦' }
@@ -77,6 +82,12 @@ const DB = (() => {
     // Pastikan setiap pengaturan ada (migrasi ringan)
     const s = { ...DEFAULT_SETTINGS, ...read(KEYS.settings, {}) };
     write(KEYS.settings, s);
+
+    // Selalu segarkan daftar kategori ke versi bawaan terbaru. Kategori
+    // bersifat bawaan (bukan buatan user), sehingga aman menimpanya agar
+    // user lama ikut mendapat kategori baru. Transaksi lama dengan kategori
+    // yang sudah dihapus tetap ditangani (tampil sebagai "Lainnya").
+    write(KEYS.accounts, DEFAULT_ACCOUNTS);
   }
 
   // ---- API Akun ----
