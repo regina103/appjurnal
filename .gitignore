@@ -18,14 +18,17 @@ _*.txt
 
 # ============================================================
 #  RAHASIA — JANGAN PERNAH di-commit ke GitHub
-#  File di bawah berisi kunci/API Supabase dan konfigurasi lokal.
+#  Hanya file .env* (berisi service_role key) yang WAJIB dirahasiakan.
 #  Jika salah satu sampai ter-push, kunci dianggap bocor.
 # ============================================================
 .env
 .env.*
 !.env.example
-public_config.js
-!public_config.example.js
+
+# Catatan: public_config.js SENGAJA di-commit. Isinya hanya URL + anon key
+# yang memang publik (aman di browser selama RLS aktif), agar situs yang
+# di-deploy di Vercel langsung berfungsi tanpa setup tambahan.
+# JANGAN pernah menaruh service_role key di public_config.js.
 
 # File server lokal (tidak perlu diunggah, hanya untuk Windows lokal)
 # Hapus baris berikut jika kamu ingin menyertakannya di repo:
