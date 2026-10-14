@@ -61,10 +61,15 @@
   <!-- Toast notifikasi -->
   <div class="toast" id="toast" hidden></div>
 
-  <!-- SDK Supabase (UMD) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- SDK Supabase (UMD). Jika CDN utama gagal (umum di koneksi HP),
+       muat dari CDN cadangan agar aplikasi tetap jalan. -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    onerror="var s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2';document.head.appendChild(s);"
+  ></script>
 
-  <!-- Konfigurasi publik (URL + anon key). File ini di-ignore git. -->
+  <!-- Konfigurasi publik (URL + anon key). Dibuat saat build Vercel dari
+       Environment Variables (scripts/generate-config.js), atau diisi lokal. -->
   <script src="public_config.js"></script>
 
   <!-- Modul aplikasi -->

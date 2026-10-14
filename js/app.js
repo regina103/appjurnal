@@ -32,14 +32,24 @@
 
   // 7) Gerbang autentikasi
   if (!Auth.tersedia()) {
-    // Supabase belum dikonfigurasi: tampilkan gate dengan pesan agar user tahu.
+    // Backend belum siap. Bedakan penyebabnya agar mudah diperbaiki.
     AuthUI.tampilkanGate();
-    const banner = document.getElementById('authPesan');
-    if (banner) {
-      banner.textContent =
-        'Backend belum dikonfigurasi. Isi public_config.js dengan SUPABASE_URL & SUPABASE_ANON_KEY.';
-      banner.className = 'auth-pesan error';
-      banner.hidden = false;
+
+    const alasan = window.SB ? window.SB.alasan : 'config';
+
+    if (alasan === 'sdk') {
+      // SDK Supabase gagal dimuat dari CDN (sering terjadi di koneksi HP yang
+      // lambat/putus). Coba muat ulang SDK beberapa kali, lalu bangun ulang.
+      tampilkanPesanGate(
+        'Menyambungkan ke server... pastikan internet aktif.',
+        'error'
+      );
+      cobaMuatUlangSDK(0);
+    } else {
+      tampilkanPesanGate(
+        'Konfigurasi backend belum tersedia pada versi ini. Hubungi admin aplikasi.',
+        'error'
+      );
     }
   } else {
     // Tampilkan gate dulu sebagai keadaan awal agar tidak ada layar kosong
@@ -89,5 +99,78 @@
       document.querySelector('meta[name="theme-color"]').setAttribute('content', '#c67e92');
       btn.textContent = '🌙';
     }
+  }
+
+  // Tampilkan pesan pada banner di gerbang login (menunggu DOM gate siap).
+  function tampilkanPesanGate(pesan, tipe) {
+    const set = () => {
+      const banner = document.getElementById('authPesan');
+      if (banner) {
+        banner.textContent = pesan;
+        banner.className = 'auth-pesan ' + (tipe || '');
+        banner.hidden = false;
+        return true;
+      }
+      return false;
+    };
+    if (!set()) setTimeout(set, 150);
+  }
+
+  // Jika SDK Supabase gagal dimuat (umum di koneksi HP), muat ulang dari CDN
+  // dan bangun ulang client. Dicoba beberapa kali dengan jeda bertambah.
+  function cobaMuatUlangSDK(percobaan) {
+    const MAKS = 4;
+    if (percobaan >= MAKS) {
+      tampilkanPesanGate(
+        'Gagal menyambung ke server. Periksa koneksi internet lalu muat ulang halaman.',
+        'error'
+      );
+      return;
+    }
+
+    // Bila SDK ternyata sudah ada (mis. baru selesai dimuat), langsung bangun.
+    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+      return bangunUlangDanLanjut();
+    }
+
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload = bangunUlangDanLanjut;
+    s.onerror = () => setTimeout(() => cobaMuatUlangSDK(percobaan + 1), 1200 * (percobaan + 1));
+    document.head.appendChild(s);
+  }
+
+  // Bangun ulang client Supabase memakai config yang sudah ada, lalu aktifkan
+  // alur autentikasi normal.
+  function bangunUlangDanLanjut() {
+    const cfg = window.PUBLIC_CONFIG || {};
+    const url = (cfg.SUPABASE_URL || '').trim();
+    const anon = (cfg.SUPABASE_ANON_KEY || '').trim();
+    if (!url || !anon || typeof window.supabase === 'undefined') return;
+
+    try {
+      window.SB.client = window.supabase.createClient(url, anon, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
+    } catch (e) {
+      return;
+    }
+    if (!window.SB.client) return;
+
+    tampilkanPesanGate('', '');
+    AuthUI.pasangTombolKeluar();
+
+    Auth.pantauPerubahan((user) => {
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (user) {
+        AuthUI.sembunyikanGate();
+        if (logoutBtn) logoutBtn.hidden = false;
+        UI.render(UI.currentPage);
+      } else {
+        if (logoutBtn) logoutBtn.hidden = true;
+        UI.resetProfilCache();
+        AuthUI.tampilkanGate();
+      }
+    });
   }
 })();
