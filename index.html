@@ -4,20 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0e7c66" />
-  <meta name="description" content="Jurnal Keuangan Siswa - catat uang saku, atur pengeluaran, dan menabung" />
-  <title>Jurnal Keuangan Siswa</title>
+  <meta name="description" content="I'mNote - catat uang saku, atur pengeluaran, dan menabung" />
+  <title>I'mNote</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icons/icon.svg" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div id="app">
+  <!-- Gerbang login / daftar (ditampilkan sebelum user masuk) -->
+  <div id="authGate" class="auth-gate" hidden></div>
+
+  <div id="app" hidden>
     <!-- Header -->
     <header class="app-header" id="appHeader">
       <div class="header-inner">
         <h1 id="pageTitle">Beranda</h1>
-        <button class="icon-btn" id="themeToggle" aria-label="Ganti tema" title="Ganti tema">🌙</button>
+        <div class="header-actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Ganti tema" title="Ganti tema">🌙</button>
+          <button class="icon-btn" id="logoutBtn" aria-label="Keluar" title="Keluar" hidden>🚪</button>
+        </div>
       </div>
     </header>
 
@@ -52,6 +58,16 @@
   <!-- Toast notifikasi -->
   <div class="toast" id="toast" hidden></div>
 
+  <!-- SDK Supabase (UMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Konfigurasi publik (URL + anon key). File ini di-ignore git. -->
+  <script src="public_config.js"></script>
+
+  <!-- Modul aplikasi -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/auth-ui.js"></script>
   <script src="js/db.js"></script>
   <script src="js/tabungan.js"></script>
   <script src="js/laporan.js"></script>

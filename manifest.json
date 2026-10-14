@@ -1,6 +1,6 @@
 {
-  "name": "Jurnal Keuangan Siswa",
-  "short_name": "Keuangan Siswa",
+  "name": "I'mNote",
+  "short_name": "I'mNote",
   "description": "Aplikasi pencatatan keuangan untuk pelajar: catat uang saku, atur pengeluaran, tetapkan budget harian, dan menabung untuk target.",
   "start_url": "index.html",
   "scope": "./",

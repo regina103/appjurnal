@@ -468,3 +468,64 @@ textarea { resize: vertical; min-height: 60px; }
 .social-tile.infak   { background: linear-gradient(135deg,#7c5cff,#9b7bff); }
 .social-tile.sedekah { background: linear-gradient(135deg,#ff5d8f,#ff8ab0); }
 .social-tile.wakaf   { background: linear-gradient(135deg,#3d8bff,#5aa0ff); }
+
+/* =====================================================================
+   Gerbang Autentikasi (login / daftar)
+   ===================================================================== */
+.header-actions { display: flex; align-items: center; gap: 10px; }
+
+.auth-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(160deg, #0ea47f 0%, #3d8bff 60%, #7c5cff 120%);
+  overflow-y: auto;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 380px;
+  background: var(--card);
+  color: var(--text);
+  border-radius: 24px;
+  padding: 30px 24px;
+  box-shadow: var(--shadow-lg);
+  animation: fade .35s ease;
+}
+
+.auth-logo {
+  width: 64px; height: 64px;
+  margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  background: var(--primary-light);
+  border-radius: 20px;
+}
+
+.auth-brand {
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+.auth-judul { font-size: 1.5rem; font-weight: 800; text-align: center; letter-spacing: -0.02em; }
+.auth-sub { text-align: center; color: var(--muted); font-size: .9rem; margin: 6px 0 18px; }
+
+.auth-pesan {
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: .85rem;
+  margin-bottom: 14px;
+  line-height: 1.35;
+}
+.auth-pesan.error { background: var(--pink-light); color: var(--danger); }
+.auth-pesan.sukses { background: var(--primary-light); color: var(--primary-dark); }
+
+.auth-alt { text-align: center; color: var(--muted); font-size: .88rem; margin-top: 16px; }
+.auth-alt a { color: var(--primary); font-weight: 700; text-decoration: none; }

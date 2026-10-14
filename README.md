@@ -1,4 +1,4 @@
-# Jurnal Keuangan Siswa
+# I'mNote
 
 Aplikasi pencatatan keuangan untuk pelajar (mobile web app / PWA).
 Membantu siswa mencatat uang saku, mengatur pengeluaran, menetapkan budget harian, dan menabung untuk target.

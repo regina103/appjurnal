@@ -1,9 +1,12 @@
 // Service Worker sederhana: cache aset agar aplikasi bisa dibuka offline.
-const CACHE = 'jurnal-siswa-v3';
+const CACHE = 'imnote-v5';
 const ASSETS = [
   'index.html',
   'manifest.json',
   'css/style.css',
+  'js/supabase-client.js',
+  'js/auth.js',
+  'js/auth-ui.js',
   'js/db.js',
   'js/tabungan.js',
   'js/laporan.js',
@@ -11,6 +14,11 @@ const ASSETS = [
   'js/app.js',
   'icons/icon.svg'
 ];
+
+// Jangan cache file ini (selalu ambil versi terbaru dari jaringan):
+// - public_config.js : agar perubahan konfigurasi langsung terbaca.
+// - SDK Supabase dari CDN : biar tidak menyimpan skrip pihak ketiga.
+const JANGAN_CACHE = ['public_config.js'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -28,6 +36,19 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+
+  const url = new URL(e.request.url);
+
+  // Hanya tangani permintaan same-origin. Request ke CDN Supabase & API
+  // Supabase (lintas origin) dibiarkan langsung ke jaringan, tidak di-cache.
+  if (url.origin !== self.location.origin) return;
+
+  // public_config.js: selalu ambil dari jaringan agar konfigurasi selalu baru.
+  if (JANGAN_CACHE.some((p) => url.pathname.endsWith(p))) {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    return;
+  }
+
   e.respondWith(
     caches.match(e.request).then((cached) => {
       return (

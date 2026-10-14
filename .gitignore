@@ -16,6 +16,17 @@ _*.txt
 # Vercel
 .vercel
 
+# ============================================================
+#  RAHASIA — JANGAN PERNAH di-commit ke GitHub
+#  File di bawah berisi kunci/API Supabase dan konfigurasi lokal.
+#  Jika salah satu sampai ter-push, kunci dianggap bocor.
+# ============================================================
+.env
+.env.*
+!.env.example
+public_config.js
+!public_config.example.js
+
 # File server lokal (tidak perlu diunggah, hanya untuk Windows lokal)
 # Hapus baris berikut jika kamu ingin menyertakannya di repo:
 # server.ps1

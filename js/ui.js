@@ -402,7 +402,7 @@ const UI = (() => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'jurnal-syariah-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.download = 'imnote-' + new Date().toISOString().slice(0, 10) + '.json';
       a.click();
       URL.revokeObjectURL(url);
       toast('Data diekspor.');
@@ -420,7 +420,7 @@ const UI = (() => {
   //  NAVIGASI
   // ================================================================
   const PAGES = {
-    beranda: { title: 'Keuangan Siswa', render: renderBeranda },
+    beranda: { title: "I'mNote", render: renderBeranda },
     transaksi: { title: 'Transaksi', render: renderTransaksi },
     tabungan: { title: 'Tabungan & Target', render: renderTabungan },
     laporan: { title: 'Laporan Keuangan', render: renderLaporan }
